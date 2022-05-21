@@ -21,14 +21,22 @@
 
 <script>
 import request from "@/util/request";
+import { useStore } from 'vuex'
+
 
 export default {
   name: "Login",
+  setup(){
+    const store = useStore()
+    return{
+      store
+    }
+  },
   data(){
     return {
       form: {
-        username: '',
-        password: '',
+        username:'',
+        password:''
       },
       rules: {
         username: [
@@ -44,18 +52,28 @@ export default {
     login(){
       this.$refs['form'].validate((valid) => {
         if (valid) {
-          request.get("/user/login",this.form).then(res => {
-            console.log(res)
-            if (res.code === '0') {
+          request.get(`/user/login/${this.form.username}/${this.form.password}`).then(res => {
+            // console.log(res[0].data)
+            if (res[0].code === 455) {
+              this.store.commit('submitClientInfo', res[0].data)//同步提交数据
               this.$message({
                 type: "success",
                 message: "登陆成功"
               })
-              this.$router.push("/home")  //登陆成功后进行页面跳转，跳转到主页
+              if (res[1].data === "client"){
+                this.$router.push("/client")  //登陆成功后进行页面跳转，跳转到客户页面
+              }
+              else if(res[1].data === "repairman"){
+                this.$router.push("/home")  //登陆成功后进行页面跳转，跳转到业务员页面
+              }
+              else{
+                this.$router.push("/user")  //登陆成功后进行页面跳转，跳转到维修员页面
+              }
+
             } else {
               this.$message({
                 type: "error",
-                message: res.msg
+                message: res[0].msg
               })
             }
           })
@@ -65,7 +83,7 @@ export default {
     register(){
       this.$router.replace('/register')
     }
-  }
+  },
 }
 </script>
 

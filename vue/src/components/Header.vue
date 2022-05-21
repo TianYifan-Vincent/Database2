@@ -12,11 +12,22 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>个人信息</el-dropdown-item>
+              <el-dropdown-item >修改密码</el-dropdown-item>
               <el-dropdown-item @click="$router.push('/login')">退出系统</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+      <el-dialog v-model="centerDialogVisible" title="修改密码" width="30%" center>
+        <el-form-item prop="username">
+          <el-input v-model="form.username" placeholder="用户名"></el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input v-model="form.password" placeholder="密码" show-password></el-input>
+        </el-form-item>
+        <el-form-item prop="confirm">
+          <el-input v-model="form.confirm" placeholder="重新输入密码" show-password></el-input>
+        </el-form-item>
+      </el-dialog>
     </div>
   </div>
 </template>

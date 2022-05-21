@@ -16,12 +16,12 @@
         border
         stripe
         style="width: 100%" >
-      <el-table-column prop="id" label="ID" width="180" sortable />
-      <el-table-column prop="username" label="用户名" width="180" />
-      <el-table-column prop="nickName" label="昵称"  />
-      <el-table-column prop="age" label="年龄"  />
-      <el-table-column prop="sex" label="性别"  />
-      <el-table-column prop="address" label="地址"  />
+      <el-table-column prop="client_id2" label="客户编号" width="180" sortable />
+      <el-table-column prop="name" label="客户名称" width="180" />
+      <el-table-column prop="nature" label="客户性质"  />
+      <el-table-column prop="discount" label="折扣率"  />
+      <el-table-column prop="contact" label="联系人"  />
+      <el-table-column prop="phone" label="联系电话"  />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
           <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>

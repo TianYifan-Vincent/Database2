@@ -24,10 +24,11 @@
 
 <script>
 import request from "@/util/request";
-
+import {User} from '@element-plus/icons'
 
 export default {
   name: "Register",
+  components: {User},
   data(){
     return {
       form: {},

@@ -14,7 +14,7 @@ import '@/assets/css/global.css'
 
 
 const app = createApp(App)
-axios.defaults.baseURL='https://localhost:9090'
+axios.defaults.baseURL='http://localhost:9090'
 app.config.globalProperties.$http=axios
 
 
