@@ -1,11 +1,11 @@
 <template>
   <div style="padding: 10px">
 <!--    功能区-->
-    <div style="margin:10px 0">
-      <el-button type="primary" @click="add">新增</el-button>
-      <el-button type="primary">导入</el-button>
-      <el-button type="primary">导出</el-button>
-    </div>
+<!--    <div style="margin:10px 0">-->
+<!--      <el-button type="primary" @click="add">新增</el-button>-->
+<!--      <el-button type="primary">导入</el-button>-->
+<!--      <el-button type="primary">导出</el-button>-->
+<!--    </div>-->
 <!--    搜索区-->
     <div style="margin:10px 0">
       <el-input v-model="search" placeholder="请输入关键字" style="width: 20%" clearable></el-input>
@@ -15,8 +15,9 @@
         :data="tableData"
         border
         stripe
-        style="width: 100%" >
-      <el-table-column prop="client_id2" label="客户编号" width="180" sortable />
+        style="width: 100%"
+        size="large">
+      <el-table-column prop="client_id" label="客户编号" width="180" sortable />
       <el-table-column prop="name" label="客户名称" width="180" />
       <el-table-column prop="nature" label="客户性质"  />
       <el-table-column prop="discount" label="折扣率"  />
@@ -24,20 +25,20 @@
       <el-table-column prop="phone" label="联系电话"  />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="primary" @click="handleEdit(scope.row)">编辑</el-button>
 <!--          <el-button type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>-->
-          <el-popconfirm
-              confirm-button-text="确认"
-              cancel-button-text="不，谢谢"
-              :icon="InfoFilled"
-              icon-color="red"
-              title="这一段内容确定要删除吗？"
-              @confirm="handleDelete(scope.row.id)"
-          >
-            <template #reference>
-              <el-button type="text">删除</el-button>
-            </template>
-          </el-popconfirm>
+<!--          <el-popconfirm-->
+<!--              confirm-button-text="确认"-->
+<!--              cancel-button-text="不，谢谢"-->
+<!--              :icon="InfoFilled"-->
+<!--              icon-color="red"-->
+<!--              title="这一段内容确定要删除吗？"-->
+<!--              @confirm="handleDelete(scope.row.id)"-->
+<!--          >-->
+<!--            <template #reference>-->
+<!--              <el-button type="text">删除</el-button>-->
+<!--            </template>-->
+<!--          </el-popconfirm>-->
         </template>
       </el-table-column>
     </el-table>
@@ -56,28 +57,32 @@
 
       <el-dialog
           v-model="dialogVisible"
-          title="提示"
+          title="基本信息"
           width="30%"
       >
-        <el-form :model="form" label-width="120px">
-          <el-form-item label="用户名">
-            <el-input v-model="form.username" style="width: 80px"></el-input>
-          </el-form-item>
-          <el-form-item label="昵称">
-            <el-input v-model="form.nickName" style="width: 80px"></el-input>
-          </el-form-item>
-          <el-form-item label="年龄">
-            <el-input v-model="form.age" style="width: 80px"></el-input>
-          </el-form-item>
-          <el-form-item label="性别">
-            <el-radio v-model="form.sex" label="男">男</el-radio>
-            <el-radio v-model="form.sex" label="女">女</el-radio>
-            <el-radio v-model="form.sex" label="未知">未知</el-radio>
-          </el-form-item>
-          <el-form-item label="地址">
-            <el-input type="textarea" v-model="form.address" style="width: 80px"></el-input>
-          </el-form-item>
-        </el-form>
+        <el-form ref="formData" :model="form" label-width="120px">
+            <el-form-item label="客户编号" prop="clientID">
+              <el-input v-model="form.client_id" placeholder="请输入客户编号" style="width: 70%"/>
+            </el-form-item>
+            <el-form-item label="客户名称" prop="name">
+              <el-input v-model="form.name" placeholder="请输入客户名称" style="width: 70%"/>
+            </el-form-item>
+            <el-form-item label="客户性质" prop="nature">
+              <el-select v-model="form.nature" placeholder="请输入客户性质" style="width: 70%">
+                <el-option label="个人" value="个人" />
+                <el-option label="单位" value="单位" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="折扣率" prop="discount">
+              <el-input v-model="form.discount" placeholder="请输入折扣率" style="width: 70%"/>
+            </el-form-item>
+            <el-form-item label="联系人" prop="contact">
+              <el-input v-model="form.contact" placeholder="请输入联系人" style="width: 70%"/>
+            </el-form-item>
+            <el-form-item label="联系电话" prop="phone">
+              <el-input v-model="form.phone" placeholder="请输入联系电话" style="width: 70%"/>
+            </el-form-item>
+          </el-form>
         <template #footer>
           <span class="dialog-footer">
             <el-button @click="dialogVisible = false">取消</el-button>
@@ -109,24 +114,48 @@ export default {
       pageSize:10,
       total: 10,
       tableData: [
+        {
+          client_id:'1',
+          name:'皮皮',
+          nature:'个人',
+          discount:0.9,
+          contact:'闪光皮皮',
+          phone:'19382761717',
+        },
+        {
+          client_id:'2',
+          name:'皮皮1',
+          nature:'个人1',
+          discount:0.8,
+          contact:'闪光皮皮1',
+          phone:'19382761',
+        },
+        {
+          client_id:'3',
+          name:'皮',
+          nature:'个',
+          discount:0.7,
+          contact:'闪光',
+          phone:'1938717',
+        },
       ],
     }
+  },
+  setup(){
+    // const dialogTableVisible=this.$refs['formData'].resetFields(); //重置表单数据，清除校验信息
+    // return{
+    //       dialogTableVisible,
+    // }
   },
   created(){
     this.load()
   },
   methods:{
     load(){
-      request.get("/api/user", {
-        params: {
-          pageNum: this.currentPage,
-          pageSize: this.pageSize,
-          search: this.search
-        }
-      }).then(res => {
+      request.get(`/user/showallclients/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
         console.log(res)
-        this.tableData = res.data.records
-        this.total = res.data.total
+        this.tableData = res.data.records//数组类的数据
+        this.total = res.data.total//总条数
       })
     },
     add(){
@@ -171,24 +200,25 @@ export default {
     handleEdit(row){
       this.form = JSON.parse(JSON.stringify(row))
       //console.log("Edit Click!")
+      // this.$refs['formData'].resetFields();
       this.dialogVisible = true
     },
-    handleDelete(id){
-      request.delete("/api/user/" + id).then(res => {
-        if (res.code === '0'){
-          this.$message({
-            type: "success",
-            message: "删除成功"
-          })
-        }else{
-          this.$message({
-            type: "error",
-            message: res.msg
-          })
-        }
-        this.load() //重新加载表格数据
-      })
-    },
+    // handleDelete(id){
+    //   request.delete("/api/user/" + id).then(res => {
+    //     if (res.code === '0'){
+    //       this.$message({
+    //         type: "success",
+    //         message: "删除成功"
+    //       })
+    //     }else{
+    //       this.$message({
+    //         type: "error",
+    //         message: res.msg
+    //       })
+    //     }
+    //     this.load() //重新加载表格数据
+    //   })
+    // },
     handleSizeChange(pageSize){ //改变当前每页个数触发
       this.pageSize = pageSize
       this.load()

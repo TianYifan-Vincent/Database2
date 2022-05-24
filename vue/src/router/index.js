@@ -14,6 +14,16 @@ const routes = [
         name: 'Home',
         component:() => import("@/views/Home")
       },
+      {
+        path: 'manageorder',
+        name: 'Manageorder',
+        component:() => import("@/views/Manageorder")
+      },
+      {
+        path: 'workorder',
+        name: 'Workorder',
+        component:() => import("@/views/Workorder")
+      },
     ]
   },
   {
@@ -27,6 +37,11 @@ const routes = [
     component: () => import("@/views/Register")
   },
   {
+    path:'/changepassword',
+    name:'Changepassword',
+    component: () => import("@/views/Changepassword")
+  },
+  {
     path:'/client',
     name:'Client',
     component: ClientLayout,
@@ -35,6 +50,16 @@ const routes = [
         path: '/client',
         name: 'Client',
         component:() => import("@/views/Client")
+      },
+      {
+        path: '/onway',
+        name: 'Onway',
+        component:() => import("@/views/Onway")
+      },
+      {
+        path: '/finished',
+        name: 'Finished',
+        component:() => import("@/views/Finished")
       },
     ]
   }

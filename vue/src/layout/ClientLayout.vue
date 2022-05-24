@@ -22,6 +22,15 @@ export default {
   components:{
     Header,
     ClientAside
+  },
+  data(){
+    return{
+      componentKey:0
+    }
+  },
+  methods:{
+  },
+  created() {
   }
 }
 </script>

@@ -55,15 +55,18 @@ export default {
           request.get(`/user/login/${this.form.username}/${this.form.password}`).then(res => {
             // console.log(res[0].data)
             if (res[0].code === 455) {
-              this.store.commit('submitClientInfo', res[0].data)//同步提交数据
+              this.store.commit('submitClientInfo', res[0].data)//同步提交个人信息数据
+              if (res.length>=3){
+                this.store.commit('submitVehicleInfo', res[2].data)//同步提交车辆数据
+              }
               this.$message({
                 type: "success",
                 message: "登陆成功"
               })
-              if (res[1].data === "client"){
+              if (res[1].data === "Client"){
                 this.$router.push("/client")  //登陆成功后进行页面跳转，跳转到客户页面
               }
-              else if(res[1].data === "repairman"){
+              else if(res[1].data === "Repairman"){
                 this.$router.push("/home")  //登陆成功后进行页面跳转，跳转到业务员页面
               }
               else{

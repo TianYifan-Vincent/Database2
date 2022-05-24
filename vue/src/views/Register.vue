@@ -4,8 +4,8 @@
       <div style="color: #cccccc; font-size: 30px; text-align: center; padding:30px 0 ">欢迎注册</div>
       <el-form ref="form" :model="form" size="normal" :rules="rules">
         <el-icon><user /></el-icon>
-        <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名"></el-input>
+        <el-form-item prop="clientId2">
+          <el-input v-model="form.clientId2" placeholder="用户名"></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input v-model="form.password" placeholder="密码" show-password></el-input>
@@ -25,6 +25,7 @@
 <script>
 import request from "@/util/request";
 import {User} from '@element-plus/icons'
+import { useStore } from 'vuex'
 
 export default {
   name: "Register",
@@ -33,7 +34,7 @@ export default {
     return {
       form: {},
       rules: {
-        username: [
+        clientId2: [
           { required: true, message: '请输入用户名', trigger: 'blur'},
         ],
         password: [
@@ -45,7 +46,12 @@ export default {
       }
     }
   },
-
+  setup(){
+    const store = useStore()
+    return{
+      store
+    }
+  },
   methods:{
     register(){
       this.$refs['form'].validate((valid) => {
@@ -57,15 +63,22 @@ export default {
             })
             return
           }
-          request.post("/api/user/register",this.form).then(res => {
+          request.post("/user/registry",this.form).then(res => {
             console.log(res)
-            if (res.code === '0') {
+            if (res.code === 200) {
               this.$message({
                 type: "success",
                 message: "注册成功"
               })
-              this.$router.push("/login")  //登陆成功后进行页面跳转，跳转到主页
-            } else {
+              this.store.commit('submitClientInfo', res.data)//同步提交个人信息数据
+              this.$router.push("/client")  //登陆成功后进行页面跳转，跳转到主页
+            }else if(res.code===2) {
+              this.$message({
+                type: "error",
+                message: res.msg
+              })
+            }
+            else {
               this.$message({
                 type: "error",
                 message: res.msg

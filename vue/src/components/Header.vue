@@ -5,36 +5,56 @@
     <div style="width:100px;padding-right:20px">
         <el-dropdown>
           <span class="el-dropdown-link">
-            张三
+            {{username}}
             <el-icon class="el-icon--right">
             <arrow-down />
             </el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item >修改密码</el-dropdown-item>
+              <el-dropdown-item @click="$router.push('/changepassword')">修改密码</el-dropdown-item>
               <el-dropdown-item @click="$router.push('/login')">退出系统</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-      <el-dialog v-model="centerDialogVisible" title="修改密码" width="30%" center>
-        <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名"></el-input>
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input v-model="form.password" placeholder="密码" show-password></el-input>
-        </el-form-item>
-        <el-form-item prop="confirm">
-          <el-input v-model="form.confirm" placeholder="重新输入密码" show-password></el-input>
-        </el-form-item>
-      </el-dialog>
+<!--      <el-dialog v-model="centerDialogVisible" title="修改密码" width="30%" center>-->
+<!--        <el-form-item prop="username">-->
+<!--          <el-input v-model="form.username" placeholder="用户名"></el-input>-->
+<!--        </el-form-item>-->
+<!--        <el-form-item prop="password">-->
+<!--          <el-input v-model="form.password" placeholder="密码" show-password></el-input>-->
+<!--        </el-form-item>-->
+<!--        <el-form-item prop="confirm">-->
+<!--          <el-input v-model="form.confirm" placeholder="重新输入密码" show-password></el-input>-->
+<!--        </el-form-item>-->
+<!--      </el-dialog>-->
     </div>
   </div>
 </template>
 
 <script>
+import {useStore} from "vuex";
 export default {
-  name: "Header"
+  name: "Header",
+  data(){
+    return{
+      username:''
+    }
+  },
+  setup(){
+    const store = useStore()
+    return{
+      store,
+    }
+  },
+  computed:{
+    getform(){
+      return this.store.state.username
+    }
+  },
+  created() {
+    this.username=this.getform
+  }
 }
 </script>
 

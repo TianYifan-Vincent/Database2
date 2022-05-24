@@ -2,7 +2,7 @@
   <div style="padding: 10px">
     <!--    功能区-->
     <div style="margin:10px 0">
-      <el-button type="primary" @click="centerDialogVisible2 = true" style="font-size: large">登记信息</el-button>
+      <el-button type="primary" @click="centerDialogVisible2=true" style="font-size: large">登记信息</el-button>
       <el-button type="primary" @click="centerDialogVisible1 = true" style="font-size: large" >新增车辆</el-button>
       <el-dialog v-model="centerDialogVisible1" title="车辆信息" width="30%" center :before-close="closeExpertFormDialog">
       <el-form ref="Vehicle" :model="formVehicle" label-width="120px" >
@@ -16,10 +16,10 @@
           <el-input v-model="formVehicle.color" placeholder="请输入车辆颜色" style="width: 70%"/>
         </el-form-item>
         <el-form-item label="车型" prop="type">
-          <el-input v-model="formVehicle.type" placeholder="请输入车型" style="width: 70%"/>
+          <el-input v-model="formVehicle.category" placeholder="请输入车型" style="width: 70%"/>
         </el-form-item>
         <el-form-item label="车辆类别" prop="class">
-          <el-select v-model="formVehicle.class" placeholder="请输入车辆类别" style="width: 70%">
+          <el-select v-model="formVehicle.type" placeholder="请输入车辆类别" style="width: 70%">
             <el-option label="微型车" value="微型车" />
             <el-option label="中型车" value="中型车" />
             <el-option label="大型车" value="大型车" />
@@ -102,7 +102,7 @@
         </el-form>
       </el-dialog>
     </div>
-    <div >
+    <div v-if="formVehicle.license">
       <el-descriptions
           class="margin-top"
           title="车辆信息"
@@ -124,7 +124,7 @@
               车牌号
             </div>
           </template>
-          沪HKY640
+          {{formVehicle.license}}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
@@ -135,7 +135,7 @@
               车架号
             </div>
           </template>
-          18100000000
+          {{formVehicle.vin}}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
@@ -146,7 +146,7 @@
               颜色
             </div>
           </template>
-          金色
+          {{formVehicle.color}}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
@@ -157,7 +157,7 @@
               车型
             </div>
           </template>
-          <el-tag size="large" style="font-size: large">帕萨特</el-tag>
+          <el-tag size="large" style="font-size: large">{{formVehicle.category}}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
@@ -168,19 +168,27 @@
               车辆类别
             </div>
           </template>
-          微型车
+          {{formVehicle.type}}
         </el-descriptions-item>
       </el-descriptions>
     </div>
+    <div v-else>暂无车辆信息</div>
   </div>
 </template>
 
 <script>
 import { ref ,computed} from 'vue'
 import {useStore} from "vuex";
-
+import request from "@/util/request";
+import ClientLayout from "@/layout/ClientLayout";
+import ClientAside from "@/components/ClientAside";
 export default {
   name: "Client",
+  inject:['reload'],
+  components:{
+    ClientLayout,
+    ClientAside
+  },
   setup() {
     const centerDialogVisible1 = ref(false)
     const centerDialogVisible2 = ref(false)
@@ -209,29 +217,29 @@ export default {
   data() {
     return {
       formVehicle: {
-        vin: '',
-        license: '',
-        color: '',
-        type: '',
-        class: '',
-        nature: '',
+        // vin: '',
+        // license: '',
+        // color: '',
+        // type: '',
+        // category: '',
+        // nature: '',
       },
       formClient: {
-        name: '',
-        nature: '',
-        discount: '',
-        contact: '',
-        phone: '',
-        client_id2: '',
+        // name: '',
+        // nature: '',
+        // discount: '',
+        // contact: '',
+        // phone: '',
+        // client_id2: '',
       },
       formRepair: {
-        vin:'',
-        payment: '',
-        approach_date: '',
-        approach_time: '',
-        failure: '',
-        fuel: '',
-        mile: '',
+        // vin:'',
+        // payment: '',
+        // approach_date: '',
+        // approach_time: '',
+        // failure: '',
+        // fuel: '',
+        // mile: '',
       }
     }
   },
@@ -241,8 +249,23 @@ export default {
       // this.formVehicle = JSON.parse(JSON.stringify(this.defaultForm2))
     },
     onSubmit2() {
+          request.put("/client",this.formClient).then(res => {
+            console.log(res)
+            if (res.code === 200) {
+              this.$message({
+                type: "success",
+                message: res.msg
+              })
+              this.store.commit('submitClientInfo', this.formClient)//同步提交个人信息数据
+              this.reload()
+            } else {
+              this.$message({
+                type: "error",
+                message: res.msg
+              })
+            }
+          })
       this.centerDialogVisible2 = false
-
     },
     onSubmit3() {
       this.centerDialogVisible3 = false
@@ -275,20 +298,19 @@ export default {
       this.$refs['Repair'].resetFields();
       done();//done 用于关闭 Dialog
     },
-    // created () {
-    //   this.defaultForm = JSON.parse(JSON.stringify(this.formClient))
-    //   this.defaultForm2 = JSON.parse(JSON.stringify(this.formVehicle))
-    //   this.defaultForm3 = JSON.parse(JSON.stringify(this.formRepair))
-    // }
 
   },
   computed:{
-    getformclient(){
-      return this.store.state.formClient
+    getvehicleform(){
+      return this.store.state.vehicle_form
+    },
+    getclientform(){
+      return this.store.state.form.clientId
     }
   },
   created() {
-    console.log(this.getformclient)
+    this.formVehicle=this.getvehicleform
+    this.formClient.clientId=this.getclientform
   }
 }
 </script>
