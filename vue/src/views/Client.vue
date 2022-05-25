@@ -15,10 +15,10 @@
         <el-form-item label="颜色" prop="color">
           <el-input v-model="formVehicle.color" placeholder="请输入车辆颜色" style="width: 70%"/>
         </el-form-item>
-        <el-form-item label="车型" prop="type">
-          <el-input v-model="formVehicle.category" placeholder="请输入车型" style="width: 70%"/>
+        <el-form-item label="车型" prop="class">
+          <el-input v-model="formVehicle.class" placeholder="请输入车型" style="width: 70%"/>
         </el-form-item>
-        <el-form-item label="车辆类别" prop="class">
+        <el-form-item label="车辆类别" prop="type">
           <el-select v-model="formVehicle.type" placeholder="请输入车辆类别" style="width: 70%">
             <el-option label="微型车" value="微型车" />
             <el-option label="中型车" value="中型车" />
@@ -66,34 +66,21 @@
               <el-radio label="三包" />
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="进场时间" prop="approach_date" >
-            <el-col :span="11">
-              <el-date-picker
-                  v-model="formRepair.approach_date"
-                  type="date"
-                  placeholder="Pick a date"
-                  style="width: 100%"
-              />
-            </el-col>
-            <el-col :span="2" class="text-center">
-              <span class="text-gray-500">-</span>
-            </el-col>
-            <el-col :span="11">
-              <el-time-picker
-                  v-model="formRepair.approach_time"
-                  placeholder="Pick a time"
-                  style="width: 100%"
-              />
-            </el-col>
+          <el-form-item label="进厂时间" prop="approach_time" >
+            <el-date-picker
+                v-model="formRepair.approach_time"
+                type="datetime"
+                placeholder="Select date and time"
+            />
           </el-form-item>
           <el-form-item label="粗略故障" prop="failure">
             <el-input v-model="formRepair.failure" type="textarea" placeholder="请粗略描述您车辆的故障（字数在255以下）"/>
           </el-form-item>
-          <el-form-item label="进场油量" prop="fuel">
-            <el-input v-model="formRepair.fuel" placeholder="进场时车辆所剩油量" style="width: 50%"/><span>L</span>
+          <el-form-item label="进厂油量" prop="fuel">
+            <el-input v-model="formRepair.fuel" placeholder="进厂时车辆所剩油量" style="width: 50%"/><span>%</span>
           </el-form-item>
-          <el-form-item label="进场里程" prop="mile">
-            <el-input v-model="formRepair.mile" placeholder="进场时车辆里程数" style="width: 50%"/><span>km</span>
+          <el-form-item label="进厂里程" prop="mile">
+            <el-input v-model="formRepair.mile" placeholder="进厂时车辆里程数" style="width: 50%"/><span>km</span>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onSubmit3">确认新增</el-button>
@@ -102,77 +89,79 @@
         </el-form>
       </el-dialog>
     </div>
-    <div v-if="formVehicle.license">
-      <el-descriptions
-          class="margin-top"
-          title="车辆信息"
-          :column="1"
-          size=large
-          border
-          style="width: 60%;font-size: large"
-      >
-        <template #extra>
-          <el-button type="primary" @click="centerDialogVisible3 = true" style="font-size: large;background-color: #001b7a">新增维修委托</el-button>
-          <el-button type="primary" style="font-size: large;background-color: #001b7a" >历史维修委托</el-button>
-        </template>
-        <el-descriptions-item>
-          <template #label>
-            <div class="cell-item">
-              <el-icon :style="iconStyle">
-                <user />
-              </el-icon>
-              车牌号
-            </div>
+    <div v-for="(item,index) in formVehicles" :key="item">
+      <div v-if="item.license">
+        <el-descriptions
+            class="margin-top"
+            title="车辆信息"
+            :column="1"
+            size=large
+            border
+            style="width: 60%;font-size: large"
+        >
+          <template #extra>
+            <el-button type="primary" @click="centerDialogVisible3 = true" style="font-size: large;background-color: #001b7a">新增维修委托</el-button>
+            <el-button type="primary" style="font-size: large;background-color: #001b7a" @click="$router.push('/onway')">历史维修委托</el-button>
           </template>
-          {{formVehicle.license}}
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template #label>
-            <div class="cell-item">
-              <el-icon :style="iconStyle">
-                <iphone />
-              </el-icon>
-              车架号
-            </div>
-          </template>
-          {{formVehicle.vin}}
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template #label>
-            <div class="cell-item">
-              <el-icon :style="iconStyle">
-                <location />
-              </el-icon>
-              颜色
-            </div>
-          </template>
-          {{formVehicle.color}}
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template #label>
-            <div class="cell-item">
-              <el-icon :style="iconStyle">
-                <tickets />
-              </el-icon>
-              车型
-            </div>
-          </template>
-          <el-tag size="large" style="font-size: large">{{formVehicle.category}}</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template #label>
-            <div class="cell-item">
-              <el-icon :style="iconStyle">
-                <office-building />
-              </el-icon>
-              车辆类别
-            </div>
-          </template>
-          {{formVehicle.type}}
-        </el-descriptions-item>
-      </el-descriptions>
+          <el-descriptions-item>
+            <template #label>
+              <div class="cell-item">
+                <el-icon :style="iconStyle">
+                  <user />
+                </el-icon>
+                车牌号
+              </div>
+            </template>
+            {{item.license}}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template #label>
+              <div class="cell-item">
+                <el-icon :style="iconStyle">
+                  <iphone />
+                </el-icon>
+                车架号
+              </div>
+            </template>
+            {{item.vin}}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template #label>
+              <div class="cell-item">
+                <el-icon :style="iconStyle">
+                  <location />
+                </el-icon>
+                颜色
+              </div>
+            </template>
+            {{item.color}}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template #label>
+              <div class="cell-item">
+                <el-icon :style="iconStyle">
+                  <tickets />
+                </el-icon>
+                车型
+              </div>
+            </template>
+            <el-tag size="large" style="font-size: large">{{item.category}}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template #label>
+              <div class="cell-item">
+                <el-icon :style="iconStyle">
+                  <office-building />
+                </el-icon>
+                车辆类别
+              </div>
+            </template>
+            {{item.type}}
+          </el-descriptions-item>
+        </el-descriptions>
+        </div>
+        <div v-else>暂无车辆信息</div>
     </div>
-    <div v-else>暂无车辆信息</div>
   </div>
 </template>
 
@@ -194,6 +183,7 @@ export default {
     const centerDialogVisible2 = ref(false)
     const centerDialogVisible3 = ref(false)
     const size = ref('')
+    const value1 = ref('')
     const store = useStore()
     const iconStyle = computed(() => {
       const marginMap = {
@@ -211,40 +201,57 @@ export default {
       centerDialogVisible3,
       size,
       iconStyle,
-      store
+      store,
+      value1
     }
   },
   data() {
     return {
+      formVehicles:[],
       formVehicle: {
-        // vin: '',
-        // license: '',
-        // color: '',
-        // type: '',
-        // category: '',
-        // nature: '',
       },
       formClient: {
-        // name: '',
-        // nature: '',
-        // discount: '',
-        // contact: '',
-        // phone: '',
-        // client_id2: '',
       },
       formRepair: {
-        // vin:'',
-        // payment: '',
-        // approach_date: '',
-        // approach_time: '',
-        // failure: '',
-        // fuel: '',
-        // mile: '',
       }
     }
   },
   methods: {
+    load(){
+      request.get(`/client/${this.formClient.clientId}`).then(res => {
+        this.formVehicles = res.data//数组类的数据
+      })
+    },
     onSubmit() {
+      this.$refs['Vehicle'].validate((valid) => {
+        if (valid) {
+          request.post("/client",this.formVehicle).then(res => {
+            console.log(res)
+            if (res.code === 454) {
+              this.$message({
+                type: "success",
+                message: "新增车辆成功"
+              })
+              // this.store.commit('submitClientInfo', this.formClient)//同步提交个人信息数据
+              this.load()
+              this.reload()//重新加载组件
+            }else if(res.code===2){
+              this.$refs["Vehicle"].resetFields();
+              this.$message({
+                type: "error",
+                message: res.msg
+              })
+            }
+            else {
+              this.$refs["Vehicle"].resetFields();
+              this.$message({
+                type: "error",
+                message: res.msg
+              })
+            }
+          })
+        }})
+      this.load()
       this.centerDialogVisible1 = false
       // this.formVehicle = JSON.parse(JSON.stringify(this.defaultForm2))
     },
@@ -268,8 +275,35 @@ export default {
       this.centerDialogVisible2 = false
     },
     onSubmit3() {
+      console.log(this.formRepair)
+      this.$refs['Repair'].validate((valid) => {
+        if (valid) {
+          request.post("/client",this.formRepair).then(res => {
+            console.log(res)
+            if (res.code === 454) {
+              this.$message({
+                type: "success",
+                message: "新增委托成功"
+              })
+              // this.store.commit('submitClientInfo', this.formClient)//同步提交个人信息数据
+              this.reload()
+            }else if(res.code===2){
+              this.$refs["Repair"].resetFields();
+              this.$message({
+                type: "error",
+                message: res.msg
+              })
+            }
+            else {
+              this.$refs["Repair"].resetFields();
+              this.$message({
+                type: "error",
+                message: res.msg
+              })
+            }
+          })
+        }})
       this.centerDialogVisible3 = false
-
     },
 
 //取消dialog
@@ -309,8 +343,12 @@ export default {
     }
   },
   created() {
-    this.formVehicle=this.getvehicleform
+    this.formVehicles=this.getvehicleform
     this.formClient.clientId=this.getclientform
+    this.formVehicle.clientId=this.getclientform
+    this.load()
+    // this.load()
+    // this.reload()
   }
 }
 </script>

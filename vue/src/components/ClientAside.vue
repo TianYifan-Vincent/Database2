@@ -9,11 +9,11 @@
     <el-sub-menu index="1" style="background-color: #d9edf7" >
       <template #title ><el-icon><document /></el-icon>
         <span >基本信息</span></template>
-      <el-menu-item index="name" class="div1">客户名称：{{form.name}}</el-menu-item>
-      <el-menu-item index="nature" class="div1">客户性质：{{form.nature}}</el-menu-item>
-      <el-menu-item index="phone" class="div1">联系电话：{{form.phone}}</el-menu-item>
-      <el-menu-item index="contact" class="div1">联系人：{{form.contact}}</el-menu-item>
-      <el-menu-item index="discount" class="div1">折扣率：{{form.discount}}</el-menu-item>
+      <el-menu-item  class="div1">客户名称：{{form.name}}</el-menu-item>
+      <el-menu-item  class="div1">客户性质：{{form.nature}}</el-menu-item>
+      <el-menu-item  class="div1">联系电话：{{form.phone}}</el-menu-item>
+      <el-menu-item  class="div1">联系人：{{form.contact}}</el-menu-item>
+      <el-menu-item  class="div1">折扣率：{{form.discount}}</el-menu-item>
 <!--      <el-menu-item index="changeinfo" style="text-decoration: underline">更改个人信息</el-menu-item>-->
 <!--      <el-menu-item index="changepwd" style="text-decoration: underline" @click="centerDialogVisible = true">更改密码</el-menu-item>-->
     </el-sub-menu>

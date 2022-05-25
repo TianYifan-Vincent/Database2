@@ -56,8 +56,11 @@ export default {
             // console.log(res[0].data)
             if (res[0].code === 455) {
               this.store.commit('submitClientInfo', res[0].data)//同步提交个人信息数据
-              if (res.length>=3){
+              this.store.commit('setstatus', res[1].data)//提交个人身份
+              if (res.length===3){
                 this.store.commit('submitVehicleInfo', res[2].data)//同步提交车辆数据
+              } else{
+                this.store.commit('setVehicle')
               }
               this.$message({
                 type: "success",

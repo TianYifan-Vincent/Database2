@@ -1,6 +1,6 @@
 <template>
   <div style="height:50px; line-height: 50px; border-bottom: 1px solid #ccc; display: flex ">
-    <div style="width:200px; padding-left:30px; font-weight: bold; color: cornflowerblue">汽车维修系统</div>
+    <div style="cursor:pointer;width:200px; padding-left:30px; font-weight: bold; color: cornflowerblue" @click="judgestatus">汽车维修系统</div>
     <div style="flex:1"></div>
     <div style="width:100px;padding-right:20px">
         <el-dropdown>
@@ -38,7 +38,15 @@ export default {
   name: "Header",
   data(){
     return{
-      username:''
+      username:'',
+      status:'',
+    }
+  },
+  methods:{
+    judgestatus(){
+      if(this.status==="Client"){
+        this.$router.push('/client')
+      }
     }
   },
   setup(){
@@ -49,11 +57,15 @@ export default {
   },
   computed:{
     getform(){
-      return this.store.state.username
+      return this.store.state.form.clientId2
+    },
+    getstatus(){
+      return this.store.state.status
     }
   },
   created() {
     this.username=this.getform
+    this.status=this.getstatus
   }
 }
 </script>
