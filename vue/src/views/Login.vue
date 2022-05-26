@@ -69,11 +69,11 @@ export default {
               if (res[1].data === "Client"){
                 this.$router.push("/client")  //登陆成功后进行页面跳转，跳转到客户页面
               }
-              else if(res[1].data === "Repairman"){
+              else if(res[1].data === "User"){
                 this.$router.push("/home")  //登陆成功后进行页面跳转，跳转到业务员页面
               }
               else{
-                this.$router.push("/user")  //登陆成功后进行页面跳转，跳转到维修员页面
+                this.$router.push("/repairman")  //登陆成功后进行页面跳转，跳转到维修员页面
               }
 
             } else {

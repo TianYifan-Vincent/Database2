@@ -83,7 +83,7 @@ export default {
     // 侦听器本质上是一个函数，要监视哪个数据的变化，就把数据名作为方法名即可
     // 新值在前，旧值在后
     search(newVal) {
-      if (newVal === null)
+      if (newVal === '')
         return
       this.load()
     }

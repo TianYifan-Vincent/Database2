@@ -8,8 +8,8 @@
 <!--    </div>-->
     <!--    搜索区-->
     <div style="margin:10px 0">
-      <el-input v-model="search" placeholder="请输入关键字" style="width: 20%" clearable></el-input>
-      <el-button type="primary" style="margin-left: 5px" @click="load">查询</el-button>
+      <el-input v-model="search" placeholder="请输入关键字" style="width: 20%" ></el-input>
+      <el-button type="primary" style="margin-left: 5px" @click="select">查询</el-button>
     </div>
     <el-table
         :data="tableData"
@@ -18,20 +18,23 @@
         style="width: 100%"
         size="large"
         >
-      <el-table-column prop="repair_id" label="订单号"  sortable />
+      <el-table-column prop="repairId" label="订单号"  sortable />
       <el-table-column prop="license" label="车牌号"  />
       <el-table-column prop="vin" label="车架号"  />
       <el-table-column prop="category" label="车型"  />
       <el-table-column prop="failure" label="粗略故障描述"  />
-      <el-table-column prop="state" fixed="right" label="操作" width="120">
+      <el-table-column prop="statu" label="状态"  >
+            未接单
+      </el-table-column>
+      <el-table-column prop="statu" fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button type="warning"  v-if="scope.row.state" @click="takeorder(scope.row)">接单</el-button>
+          <el-button type="warning"  v-if="scope.row.statu==='未接单'" @click="takeorder(scope.row)">接单</el-button>
           <el-button type="primary" v-else @click="handleEdit(scope.row)">编辑</el-button>
         </template>
       </el-table-column>
       <el-table-column  fixed="right" label="维修委托书" width="120">
         <template #default="scope">
-          <el-button type="success" :disabled="scope.row.state?true:false" @click="handleEdit(scope.row)">生成</el-button>
+          <el-button type="success" :disabled="scope.row.statu==='未接单'?true:false" @click="handleEdit(scope.row)">生成</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -39,7 +42,7 @@
       <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="crrentPage"
+          :current-page="currentPage"
           :page-sizes="[5, 10, 20]"
           :page-size="pageSize"
           :pager-count="10"
@@ -51,11 +54,8 @@
         <el-form ref="formData" :model="form" label-width="120px">
           <div style="display: flex">
             <div>
-              <el-form-item label="车架号" prop="vin">
-                <el-input v-model="form.vin" placeholder="请输入车架号" style="width: 50%"/>
-              </el-form-item>
               <el-form-item label="结算方式" prop="resource">
-                <el-radio-group v-model="form.resource">
+                <el-radio-group v-model="form.payment">
                   <el-radio label="自付" />
                   <el-radio label="索赔" />
                   <el-radio label="三包" />
@@ -63,16 +63,16 @@
               </el-form-item>
               <el-form-item label="进厂时间" prop="approach_date" >
                 <el-date-picker
-                    v-model="form.approach_time"
+                    v-model="form.approachTime"
                     type="datetime"
                     placeholder="Select date and time"
                 />
               </el-form-item>
               <el-form-item label="进厂油量" prop="fuel">
-                <el-input v-model="form.fuel" placeholder="进厂时车辆所剩油量" style="width: 50%"/><span>%</span>
+                <el-input v-model="form.fuel" placeholder="进厂时车辆所剩油量" style="width: 70%"/><span>%</span>
               </el-form-item>
               <el-form-item label="进厂里程" prop="mile">
-                <el-input v-model="form.mile" placeholder="进厂时车辆里程数" style="width: 50%"/><span>km</span>
+                <el-input v-model="form.mile" placeholder="进厂时车辆里程数" style="width: 70%"/><span>km</span>
               </el-form-item>
             </div>
             <div>
@@ -83,18 +83,18 @@
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="作业分类" prop="classification">
-                <el-radio-group v-model="form.type">
-                  <el-radio label="小型" />
-                  <el-radio label="中型" />
-                  <el-radio label="大型" />
+                <el-radio-group v-model="form.classification">
+                  <el-radio label="小修" />
+                  <el-radio label="中修" />
+                  <el-radio label="大修" />
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="详细故障" prop="failure" >
-                <el-input v-model="form.failure" type="textarea" placeholder="请详细描述您车辆的故障（字数在255以下）" />
+                <el-input v-model="form.failure" type="textarea" placeholder="请详细描述您车辆的故障（字数在255以下）" maxlength="255" rows="6" clearable size="large"/>
               </el-form-item>
-              <el-form-item label="出厂时间" prop="leave_time" >
+              <el-form-item label="预计出厂时间" prop="leave_time" >
                 <el-date-picker
-                    v-model="form.leave_time"
+                    v-model="form.ddl"
                     type="datetime"
                     placeholder="Select date and time"
                 />
@@ -117,7 +117,7 @@
 // @ is an alias to /src
 
 import request from "@/util/request";
-
+import {useStore} from "vuex";
 export default {
   name: 'Manageorder',
   components: {
@@ -125,56 +125,49 @@ export default {
   },
   data() {
     return {
-      crrentPage: 1,
       form: {},
       dialogVisible: false,
       buttonvisible: true,
-      search: '',
+      search: null,
       currentPage: 1,
       pageSize:10,
       total: 10,
-      tableData: [
-        {
-          repair_id:1,
-          license:'沪A88888',
-          vin:'12342131',
-          category:'帕萨特',
-          failure:'发动机故障灯亮',
-          state:true//待接单
-        },
-        {
-          repair_id:2,
-          license:'沪A88288',
-          vin:'12322131',
-          category:'QQ',
-          failure:'新赛车，来个属性强化',
-          state:false
-        },
-        {
-          repair_id:3,
-          license:'沪A83888',
-          vin:'12342144',
-          category:'奥迪',
-          failure:'添加空调氟利昂',
-          state: false
-        },
-      ],
+      tableData: [],
     }
   },
   setup(){
-    // const dialogTableVisible=this.$refs['formData'].resetFields(); //重置表单数据，清除校验信息
-    // return{
-    //       dialogTableVisible,
-    // }
+    const store = useStore()
+    return{
+      store
+    }
+  },
+  computed:{
+    getuserform(){
+      return this.store.state.form.userId
+    }
   },
   created(){
+    this.form.userId=this.getuserform
     this.load()
   },
+  watch:{
+    // 侦听器本质上是一个函数，要监视哪个数据的变化，就把数据名作为方法名即可
+    // 新值在前，旧值在后
+    search(newVal) {
+      if (newVal === ''){
+        return
+      }
+      this.load()
+    }
+  },
   methods:{
+    select(){
+      this.load()
+    },
     load(){
-      request.get(`/user/showallclients/ongoing/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
+      request.get(`/user/show/repair/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
         console.log(res)
-        this.tableData = res.data.records//数组类的数据
+        this.tableData = res.data.list//数组类的数据
         this.total = res.data.total//总条数
       })
     },
@@ -183,37 +176,20 @@ export default {
       this.form = {}
     },
     save() {
-      if (this.form.id) {
-        request.put("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "更新成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
-      } else {  //新增
-        request.post("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "新增成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
-      }
+      request.put("/user/repair", this.form).then(res => {
+        console.log(res)
+        if (res.code === 457) {
+          this.$message({
+            type: "success",
+            message: "编辑成功"
+          })
+        } else {
+          this.$message({
+            type: "error",
+            message: res.msg
+          })
+        }
+      })
       this.load()
       this.dialogVisible = false
     },
@@ -223,22 +199,6 @@ export default {
       // this.$refs['formData'].resetFields();
       this.dialogVisible = true
     },
-    // handleDelete(id){
-    //   request.delete("/api/user/" + id).then(res => {
-    //     if (res.code === '0'){
-    //       this.$message({
-    //         type: "success",
-    //         message: "删除成功"
-    //       })
-    //     }else{
-    //       this.$message({
-    //         type: "error",
-    //         message: res.msg
-    //       })
-    //     }
-    //     this.load() //重新加载表格数据
-    //   })
-    // },
     handleSizeChange(pageSize){ //改变当前每页个数触发
       this.pageSize = pageSize
       this.load()
@@ -250,7 +210,7 @@ export default {
     takeorder(row){
       for (let i=0;i<this.tableData.length;i++){
         if(row===this.tableData[i]){
-          this.tableData[i].state=false
+          this.tableData[i].statu='等待派单'
           break
         }
       }

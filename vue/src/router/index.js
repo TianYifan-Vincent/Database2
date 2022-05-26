@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from "../layout/Layout.vue"
 import ClientLayout from "@/layout/ClientLayout";
-
+import RepairmanLayout from "@/layout/RepairmanLayout"
 const routes = [
   {
     path: '/',
@@ -62,7 +62,24 @@ const routes = [
         component:() => import("@/views/Finished")
       },
     ]
-  }
+  },
+  {
+    path: '/repairman',
+    name: 'Repairman',
+    component: RepairmanLayout,
+    children: [
+      {
+        path: '/repairman',
+        name: 'Repairman',
+        component:() => import("@/views/Repairman")
+      },
+      {
+        path: '/onrepair',
+        name: 'Onrepair',
+        component:() => import("@/views/Onrepair")
+      },
+    ]
+  },
 ]
 
 const router = createRouter({

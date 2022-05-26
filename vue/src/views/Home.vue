@@ -8,8 +8,8 @@
 <!--    </div>-->
 <!--    搜索区-->
     <div style="margin:10px 0">
-      <el-input v-model="search" placeholder="请输入关键字" style="width: 20%" clearable></el-input>
-      <el-button type="primary" style="margin-left: 5px" @click="load">查询</el-button>
+      <el-input v-model="search" placeholder="请输入关键字" style="width: 20%"></el-input>
+      <el-button type="primary" style="margin-left: 5px" @click="select">查询</el-button>
     </div>
     <el-table
         :data="tableData"
@@ -17,28 +17,15 @@
         stripe
         style="width: 100%"
         size="large">
-      <el-table-column prop="client_id" label="客户编号" width="180" sortable />
-      <el-table-column prop="name" label="客户名称" width="180" />
-      <el-table-column prop="nature" label="客户性质"  />
-      <el-table-column prop="discount" label="折扣率"  />
+      <el-table-column prop="clientId" label="客户编号" width="150" sortable />
+      <el-table-column prop="name" label="客户名称" width="150" />
+      <el-table-column prop="nature" label="客户性质"  width="150"/>
+      <el-table-column prop="discount" label="折扣率" width="150" />
       <el-table-column prop="contact" label="联系人"  />
       <el-table-column prop="phone" label="联系电话"  />
-      <el-table-column fixed="right" label="操作" width="120">
+      <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
           <el-button type="primary" @click="handleEdit(scope.row)">编辑</el-button>
-<!--          <el-button type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>-->
-<!--          <el-popconfirm-->
-<!--              confirm-button-text="确认"-->
-<!--              cancel-button-text="不，谢谢"-->
-<!--              :icon="InfoFilled"-->
-<!--              icon-color="red"-->
-<!--              title="这一段内容确定要删除吗？"-->
-<!--              @confirm="handleDelete(scope.row.id)"-->
-<!--          >-->
-<!--            <template #reference>-->
-<!--              <el-button type="text">删除</el-button>-->
-<!--            </template>-->
-<!--          </el-popconfirm>-->
         </template>
       </el-table-column>
     </el-table>
@@ -46,7 +33,7 @@
       <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="crrentPage"
+          :current-page="currentPage"
           :page-sizes="[5, 10, 20]"
           :page-size="pageSize"
           :pager-count="10"
@@ -61,9 +48,9 @@
           width="30%"
       >
         <el-form ref="formData" :model="form" label-width="120px">
-            <el-form-item label="客户编号" prop="clientID">
-              <el-input v-model="form.client_id" placeholder="请输入客户编号" style="width: 70%"/>
-            </el-form-item>
+<!--            <el-form-item label="客户编号" prop="clientID">-->
+<!--              <el-input v-model="form.client_id" placeholder="请输入客户编号" style="width: 70%"/>-->
+<!--            </el-form-item>-->
             <el-form-item label="客户名称" prop="name">
               <el-input v-model="form.name" placeholder="请输入客户名称" style="width: 70%"/>
             </el-form-item>
@@ -98,7 +85,7 @@
 // @ is an alias to /src
 
 import request from "@/util/request";
-
+import {useStore} from "vuex";
 export default {
   name: 'Home',
   components: {
@@ -106,55 +93,42 @@ export default {
   },
   data() {
     return {
-      crrentPage: 1,
+      currentPage: 1,
       form: {},
       dialogVisible: false,
-      search: '',
-      currentPage: 1,
+      search: null,
       pageSize:10,
       total: 10,
-      tableData: [
-        {
-          client_id:'1',
-          name:'皮皮',
-          nature:'个人',
-          discount:0.9,
-          contact:'闪光皮皮',
-          phone:'19382761717',
-        },
-        {
-          client_id:'2',
-          name:'皮皮1',
-          nature:'个人1',
-          discount:0.8,
-          contact:'闪光皮皮1',
-          phone:'19382761',
-        },
-        {
-          client_id:'3',
-          name:'皮',
-          nature:'个',
-          discount:0.7,
-          contact:'闪光',
-          phone:'1938717',
-        },
-      ],
+      tableData: [],
     }
   },
   setup(){
-    // const dialogTableVisible=this.$refs['formData'].resetFields(); //重置表单数据，清除校验信息
-    // return{
-    //       dialogTableVisible,
-    // }
+    const store = useStore()
+    return {
+      store
+    }
   },
   created(){
     this.load()
   },
+  watch:{
+    // 侦听器本质上是一个函数，要监视哪个数据的变化，就把数据名作为方法名即可
+    // 新值在前，旧值在后
+    search(newVal) {
+      if (newVal === ''){
+        return
+      }
+      this.load()
+    }
+  },
   methods:{
+    select(){
+      this.load()
+    },
     load(){
-      request.get(`/user/showallclients/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
+      request.get(`/user/show/client/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
         console.log(res)
-        this.tableData = res.data.records//数组类的数据
+        this.tableData = res.data.list//数组类的数据
         this.total = res.data.total//总条数
       })
     },
@@ -163,62 +137,34 @@ export default {
       this.form = {}
     },
     save() {
-      if (this.form.id) {
-        request.put("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "更新成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
+      if ((this.form.discount <=0 ) | (this.form.discount>1)) {
+        this.$message({
+          type: "error",
+          message: "折扣率范围不对！"
         })
-      } else {  //新增
-        request.post("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "新增成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
+        return
       }
+      request.put("/user/client/update", this.form).then(res => {
+        console.log(res)
+        if (res.code === 457) {
+          this.$message({
+            type: "success",
+            message: "编辑成功"
+          })
+        } else {
+          this.$message({
+            type: "error",
+            message: res.msg
+          })
+        }
+      })
       this.load()
       this.dialogVisible = false
     },
     handleEdit(row){
-      this.form = JSON.parse(JSON.stringify(row))
-      //console.log("Edit Click!")
-      // this.$refs['formData'].resetFields();
+      this.form.clientId=row.clientId
       this.dialogVisible = true
     },
-    // handleDelete(id){
-    //   request.delete("/api/user/" + id).then(res => {
-    //     if (res.code === '0'){
-    //       this.$message({
-    //         type: "success",
-    //         message: "删除成功"
-    //       })
-    //     }else{
-    //       this.$message({
-    //         type: "error",
-    //         message: res.msg
-    //       })
-    //     }
-    //     this.load() //重新加载表格数据
-    //   })
-    // },
     handleSizeChange(pageSize){ //改变当前每页个数触发
       this.pageSize = pageSize
       this.load()

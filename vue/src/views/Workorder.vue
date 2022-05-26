@@ -28,7 +28,7 @@
       <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="crrentPage"
+          :current-page="currentPage"
           :page-sizes="[5, 10, 20]"
           :page-size="pageSize"
           :pager-count="10"
@@ -48,7 +48,7 @@
           <el-option
               v-for="item in options"
               :key="item.value"
-              :label="item.label"
+              :label="item.value"
               :value="item.value"
           />
         </el-select>
@@ -82,35 +82,34 @@ export default {
   data() {
     return {
       checked1:false,
-      crrentPage: 1,
       form: {},
       dialogVisible: false,
-      search: '',
+      search: null,
       currentPage: 1,
       pageSize:10,
       total: 10,
       multipleSelection: [],
       options:[
         {
-          value: 'Option1',
-          label: 'Option1',
+          value: '1',
+          label: '1',
         },
         {
-          value: 'Option2',
-          label: 'Option2',
+          value: '2',
+          label: '2',
         },
         {
-          value: 'Option3',
-          label: 'Option3',
+          value: '3',
+          label: '3',
         },
         {
-          value: 'Option4',
-          label: 'Option4',
+          value: '4',
+          label: '4',
         },
         {
-          value: 'Option5',
-          label: 'Option5',
-        },],
+          value: '5',
+          label: '5',
+        }],
       tableData: [
         {
           proid:'1',
@@ -147,9 +146,9 @@ export default {
   },
   methods:{
     load(){
-      request.get(`/user/showallclients/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
+      request.get(`/user/showallrepairman/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
         console.log(res)
-        this.tableData = res.data.records//数组类的数据
+        this.tableData = res.data.list//数组类的数据
         this.total = res.data.total//总条数
       })
     },
@@ -158,37 +157,20 @@ export default {
       this.form = {}
     },
     save() {
-      if (this.form.id) {
-        request.put("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "更新成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
-      } else {  //新增
-        request.post("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "新增成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
-      }
+      request.put("/user/order/update", this.form).then(res => {
+        console.log(res)
+        if (res.code === 457) {
+          this.$message({
+            type: "success",
+            message: "派工成功"
+          })
+        } else {
+          this.$message({
+            type: "error",
+            message: res.msg
+          })
+        }
+      })
       this.load()
       this.dialogVisible = false
     },
@@ -210,10 +192,12 @@ export default {
       this.multipleSelection = val;
     },
     submit(){
-      let arr = this.$refs['multipleTable']
-      // console.log('arr', arr)
       console.log(this.multipleSelection)
       this.dialogVisible=true
+      request.get("/showallorderid").then(res => {
+        console.log(res)
+        this.options = res.data.list//数组类的数据
+      })
     }
   },
 }
