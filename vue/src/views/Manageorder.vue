@@ -23,18 +23,20 @@
       <el-table-column prop="vin" label="车架号"  />
       <el-table-column prop="category" label="车型"  />
       <el-table-column prop="failure" label="粗略故障描述"  />
-      <el-table-column prop="statu" label="状态"  >
-            未接单
+      <el-table-column prop="statu" label="状态" style="color: aquamarine" width="80">
+        <template #default="scope">
+            {{scope.row.statu}}
+        </template>
       </el-table-column>
       <el-table-column prop="statu" fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button type="warning"  v-if="scope.row.statu==='未接单'" @click="takeorder(scope.row)">接单</el-button>
-          <el-button type="primary" v-else @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="warning" size="medium" plain v-if="scope.row.statu==='未接单'" @click="takeorder(scope.row)">接单</el-button>
+          <el-button type="primary" size="medium" plain v-else @click="handleEdit(scope.row)" :disabled="scope.row.statu==='已完成'?true:false">编辑</el-button>
         </template>
       </el-table-column>
       <el-table-column  fixed="right" label="维修委托书" width="120">
         <template #default="scope">
-          <el-button type="success" :disabled="scope.row.statu==='未接单'?true:false" @click="handleEdit(scope.row)">生成</el-button>
+          <el-button type="success" size="medium" plain :disabled="scope.row.statu==='未接单'?true:false" @click="handleEdit(scope.row)">生成</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -69,10 +71,10 @@
                 />
               </el-form-item>
               <el-form-item label="进厂油量" prop="fuel">
-                <el-input v-model="form.fuel" placeholder="进厂时车辆所剩油量" style="width: 70%"/><span>%</span>
+                <el-input type="number" v-model="form.fuel" placeholder="进厂时车辆所剩油量" style="width: 70%"/><span>%</span>
               </el-form-item>
               <el-form-item label="进厂里程" prop="mile">
-                <el-input v-model="form.mile" placeholder="进厂时车辆里程数" style="width: 70%"/><span>km</span>
+                <el-input type="number" v-model="form.mile" placeholder="进厂时车辆里程数" style="width: 70%"/><span>km</span>
               </el-form-item>
             </div>
             <div>
@@ -90,7 +92,7 @@
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="详细故障" prop="failure" >
-                <el-input v-model="form.failure" type="textarea" placeholder="请详细描述您车辆的故障（字数在255以下）" maxlength="255" rows="6" clearable size="large"/>
+                <el-input v-model="form.failure" type="textarea" placeholder="请详细描述您车辆的故障（字数在255以下）" maxlength="255" rows="4" clearable size="large"/>
               </el-form-item>
               <el-form-item label="预计出厂时间" prop="leave_time" >
                 <el-date-picker
@@ -125,6 +127,7 @@ export default {
   },
   data() {
     return {
+      userId:null,
       form: {},
       dialogVisible: false,
       buttonvisible: true,
@@ -147,7 +150,7 @@ export default {
     }
   },
   created(){
-    this.form.userId=this.getuserform
+    this.userId=this.getuserform
     this.load()
   },
   watch:{
@@ -176,7 +179,9 @@ export default {
       this.form = {}
     },
     save() {
-      request.put("/user/repair", this.form).then(res => {
+      console.log(this.userId)
+      console.log(this.form)
+      request.put(`/user/repair/${this.userId}`, this.form).then(res => {
         console.log(res)
         if (res.code === 457) {
           this.$message({
@@ -194,9 +199,7 @@ export default {
       this.dialogVisible = false
     },
     handleEdit(row){
-      this.form = JSON.parse(JSON.stringify(row))
-      //console.log("Edit Click!")
-      // this.$refs['formData'].resetFields();
+      this.form.repairId=row.repairId
       this.dialogVisible = true
     },
     handleSizeChange(pageSize){ //改变当前每页个数触发
