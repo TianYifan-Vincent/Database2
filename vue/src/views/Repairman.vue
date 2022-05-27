@@ -133,13 +133,13 @@ export default {
     this.load()
   },
   methods:{
-    // load(){
-    //   request.get(`/user/showallclients/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
-    //     console.log(res)
-    //     this.tableData = res.data.records//数组类的数据
-    //     this.total = res.data.total//总条数
-    //   })
-    // },
+    load(){
+      request.get(`/user/showallclients/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
+        console.log(res)
+        this.tableData = res.data.records//数组类的数据
+        this.total = res.data.total//总条数
+      })
+    },
     add(){
       this.dialogVisible = true;
       this.form = {}

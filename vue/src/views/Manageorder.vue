@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 10px">
+  <div ref="pdf" style="padding: 10px">
     <!--    功能区-->
 <!--    <div style="margin:10px 0">-->
 <!--      <el-button type="primary" @click="add">新增</el-button>-->
@@ -36,7 +36,7 @@
       </el-table-column>
       <el-table-column  fixed="right" label="维修委托书" width="120">
         <template #default="scope">
-          <el-button type="success" size="medium" plain :disabled="scope.row.statu==='未接单'?true:false" @click="handleEdit(scope.row)">生成</el-button>
+          <el-button type="success" size="medium" plain :disabled="scope.row.statu==='未接单'?true:false" @click="submitExport(scope.row)">生成</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -52,6 +52,32 @@
           :total="total"
       >
       </el-pagination>
+      <el-dialog v-model="dialogVisible2" title="维修委托书" center>
+        <el-descriptions  column="2" size="large" >
+          <el-descriptions-item label="订单号" label-class-name="my-label" class-name="my-content" style="display:flex;justify-content: flex-start;">20220527001</el-descriptions-item>
+          <el-descriptions-item label="登记日期" label-class-name="my-label2" class-name="my-content2" style="display:flex;flex:1;justify-content: flex-end">2022-05-27</el-descriptions-item>
+        </el-descriptions>
+        <el-table
+            :data="tableData2"
+            border
+            stripe
+            style="width: 100%"
+            size="large">
+          <!--      <el-table-column prop="repair_id" label="订单号"  sortable />-->
+          <el-table-column prop="license" label="车牌号"  />
+          <el-table-column prop="vin" label="车架号"  />
+          <el-table-column prop="category" label="车型"  />
+          <el-table-column prop="failure" label="故障描述"  />
+          <el-table-column prop="approachTime" label="进场时间"  />
+          <el-table-column prop="statu" label="接单状态"  />
+        </el-table>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="dialogVisible2 = false">取消</el-button>
+            <el-button type="primary" @click="handleExport(row)">确定</el-button>
+          </span>
+        </template>
+      </el-dialog>
       <el-dialog v-model="dialogVisible" title="编辑订单" width="60%">
         <el-form ref="formData" :model="form" label-width="120px">
           <div style="display: flex">
@@ -106,18 +132,18 @@
         </el-form>
         <template #footer>
           <span class="dialog-footer">
-            <el-button @click="dialogVisible = false">取消</el-button>
             <el-button type="primary" @click="save">确定</el-button>
+            <el-button @click="dialogVisible = false">取消</el-button>
           </span>
         </template>
-    </el-dialog>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-
+import {downloadPDF} from "@/util/pdf.js"  //工具方法，导出操作
 import request from "@/util/request";
 import {useStore} from "vuex";
 export default {
@@ -130,12 +156,39 @@ export default {
       userId:null,
       form: {},
       dialogVisible: false,
+      dialogVisible2: false,
       buttonvisible: true,
       search: null,
       currentPage: 1,
       pageSize:10,
       total: 10,
       tableData: [],
+      tableData2: [
+        {
+          client_id:'1',
+          name:'皮皮',
+          nature:'个人',
+          discount:[1,2,3],
+          contact:['前制动盘','制动液','轮胎'],
+          phone:'19382761717',
+        },
+        {
+          client_id:'2',
+          name:'皮皮1',
+          nature:'个人1',
+          discount:0.8,
+          contact:['1','2','3'],
+          phone:'19382761',
+        },
+        {
+          client_id:'3',
+          name:'皮',
+          nature:'个',
+          discount:0.7,
+          contact:['1','2','3'],
+          phone:'1938717',
+        },
+      ],
     }
   },
   setup(){
@@ -158,7 +211,7 @@ export default {
     // 新值在前，旧值在后
     search(newVal) {
       if (newVal === ''){
-        return
+        this.search=null
       }
       this.load()
     }
@@ -202,6 +255,12 @@ export default {
       this.form.repairId=row.repairId
       this.dialogVisible = true
     },
+    handleExport(row){
+      downloadPDF(this.$refs.pdf)
+    },
+    submitExport(row){
+      this.dialogVisible2=true
+  },
     handleSizeChange(pageSize){ //改变当前每页个数触发
       this.pageSize = pageSize
       this.load()
@@ -222,5 +281,21 @@ export default {
 }
 </script>
 <style>
-
+.my-label {
+  color: black !important;
+  font-size:  medium;
+}
+.my-content {
+  color: black;
+  font-size: medium;
+}
+.my-label2 {
+  justify-content: flex-end !important;
+  color: black !important;
+  font-size:  medium;
+}
+.my-content2 {
+  color: black;
+  font-size: medium;
+}
 </style>

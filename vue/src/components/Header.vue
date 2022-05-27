@@ -4,7 +4,7 @@
     <div style="flex:1"></div>
     <div style="width:100px;padding-right:20px">
         <el-dropdown>
-          <span class="el-dropdown-link">
+          <span class="el-dropdown-link" style="display: flex">
             {{username}}
             <el-icon class="el-icon--right">
             <arrow-down />
@@ -34,8 +34,10 @@
 
 <script>
 import {useStore} from "vuex";
+import {ArrowDown} from '@element-plus/icons'
 export default {
   name: "Header",
+  components: {ArrowDown},
   data(){
     return{
       username:'',
@@ -70,6 +72,6 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 
 </style>

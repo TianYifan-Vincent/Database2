@@ -15,13 +15,13 @@
         @selection-change="handleSelectionChange"
         >
       <el-table-column type="selection" width="55"/>
-      <el-table-column prop="proid" label="项目号"  sortable  />
-      <el-table-column prop="proname" label="项目名"  />
+      <el-table-column prop="proId" label="项目号"  sortable  />
+      <el-table-column prop="pname" label="项目名"  />
       <el-table-column prop="hour" label="工时"  />
-      <el-table-column prop="type" label="工种"  />
-<!--      <el-table-column prop="number" label="维修员编号"  />-->
-      <el-table-column prop="name" label="维修员姓名"  />
-      <el-table-column prop="status" label="维修状态"  />
+      <el-table-column prop="job" label="工种"  />
+<!--      <el-table-column prop="repairmanId" label="维修员编号"  />-->
+      <el-table-column prop="realname" label="维修员姓名"  />
+      <el-table-column prop="statu" label="维修状态"  />
 
     </el-table>
     <div style="margin: 10px 0">
@@ -44,18 +44,18 @@
           title="选择订单编号"
           width="30%"
       >
-        <el-select v-model="value" class="m-2" placeholder="选择订单编号" size="large">
+        <el-select v-model="optionvalue" class="m-2" placeholder="选择订单编号" size="large">
           <el-option
               v-for="item in options"
-              :key="item.value"
-              :label="item.value"
-              :value="item.value"
+              :key="item"
+              :label="item"
+              :value="item"
           />
         </el-select>
         <template #footer>
           <span class="dialog-footer">
-            <el-button @click="dialogVisible = false">取消</el-button>
             <el-button type="primary" @click="save">确定</el-button>
+            <el-button @click="dialogVisible = false">取消</el-button>
       </span>
         </template>
       </el-dialog>
@@ -67,89 +67,64 @@
 // @ is an alias to /src
 
 import request from "@/util/request";
-import { ref } from 'vue'
+import { ref } from 'vue';
+import {useStore} from "vuex";
 export default {
   name: 'Workroder',
   components: {
 
   },
   setup(){
+    const store = useStore()
     const value = ref('')
     return{
-      value
+      value,
+      store
         }
+  },
+  computed:{
+    getuserform(){
+      return this.store.state.form.userId
+    }
+  },
+  created(){
+    this.userId=this.getuserform
+    this.load()
+  },
+  watch:{
+    // 侦听器本质上是一个函数，要监视哪个数据的变化，就把数据名作为方法名即可
+    // 新值在前，旧值在后
+    search(newVal) {
+      if (newVal === ''){
+        this.search=null
+      }
+      this.load()
+    }
   },
   data() {
     return {
+      userId:null,
+      optionvalue:null,//选择的订单编号
       checked1:false,
       form: {},
+      optionform:{},
       dialogVisible: false,
       search: null,
       currentPage: 1,
       pageSize:10,
       total: 10,
       multipleSelection: [],
-      options:[
-        {
-          value: '1',
-          label: '1',
-        },
-        {
-          value: '2',
-          label: '2',
-        },
-        {
-          value: '3',
-          label: '3',
-        },
-        {
-          value: '4',
-          label: '4',
-        },
-        {
-          value: '5',
-          label: '5',
-        }],
-      tableData: [
-        {
-          proid:'1',
-          proname:'检查',
-          hour:0.5,
-          type:'电工',
-          number:'123',
-          name:'tyf',
-          status:'空闲中'
-        },
-        {
-          proid:'2',
-          proname:'检查',
-          hour:1,
-          type:'机修工',
-          number:'12',
-          name:'lml',
-          status:'空闲中'
-        },
-        {
-          proid:'3',
-          proname:'检查',
-          hour:2,
-          type:'机修工',
-          number:'321',
-          name:'xml',
-          status:'空闲中'
-        },
-      ],
+      options:[],
+      tableData: [],
     }
-  },
-  created(){
-    this.load()
   },
   methods:{
     load(){
-      request.get(`/user/showallrepairman/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
+      request.get(`/user/show/repairman/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
         console.log(res)
-        this.tableData = res.data.list//数组类的数据
-        this.total = res.data.total//总条数
+        this.tableData = res[0].data.list//数组类的数据
+        this.total = res[0].data.total//总条数
+        this.options=res[1].data//所有可派工订单
       })
     },
     add(){
@@ -157,9 +132,11 @@ export default {
       this.form = {}
     },
     save() {
-      request.put("/user/order/update", this.form).then(res => {
+      this.optionform.repairId=this.optionvalue
+      console.log(this.optionform)
+      request.post("/user/userSubmit", this.optionform).then(res => {
         console.log(res)
-        if (res.code === 457) {
+        if (res.code === 505) {
           this.$message({
             type: "success",
             message: "派工成功"
@@ -193,11 +170,9 @@ export default {
     },
     submit(){
       console.log(this.multipleSelection)
+      this.optionform.list=this.multipleSelection
+      this.optionform.userId=this.userId
       this.dialogVisible=true
-      request.get("/showallorderid").then(res => {
-        console.log(res)
-        this.options = res.data.list//数组类的数据
-      })
     }
   },
 }

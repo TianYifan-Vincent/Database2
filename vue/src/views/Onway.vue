@@ -84,7 +84,7 @@ export default {
     // 新值在前，旧值在后
     search(newVal) {
       if (newVal === '')
-        return
+        this.search=null
       this.load()
     }
   },
