@@ -162,7 +162,7 @@ export default {
       this.dialogVisible = false
     },
     handleEdit(row){
-      this.form.clientId=row.clientId
+      this.form=row
       this.dialogVisible = true
     },
     handleSizeChange(pageSize){ //改变当前每页个数触发

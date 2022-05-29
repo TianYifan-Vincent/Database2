@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shu.carsystem.mapper.VehicleMapper">
+    <!-- List<Vehicle> getListByCId(Integer id); -->
+    <resultMap id="VehicleMap" type="Vehicle">
+        <id property="vehicleId" column="vehicle_id"></id>
+        <result property="license" column="license"></result>
+        <result property="color" column="color"></result>
+        <result property="type" column="type"></result>
+        <result property="category" column="class"></result>
+        <result property="clientId" column="client_id"></result>
+        <result property="vin" column="vin"></result>
+    </resultMap>
+    <select id="getListByCId" resultMap="VehicleMap">
+        select * from "vehicle"
+            <where>
+                client_id = #{id};
+            </where>
+    </select>
+
+    <!--int containLicenseOrVin(String License, String Vin); -->
+    <select id="containLicenseOrVin" resultType="Integer">
+        select count(*) from vehicle where license = #{License} or vin = #{Vin};
+    </select>
+
+    <!-- int insertVehicle(Vehicle vehicle); -->
+    <insert id="insertVehicle" useGeneratedKeys="true" keyProperty="vehicleId">
+        <selectKey keyProperty="vehicleId" resultType="int" order="BEFORE">
+            select (select max(vehicle_id) from vehicle)+1 as vehicle_id;
+        </selectKey>
+        insert into vehicle values (#{vehicleId},#{license},#{color},#{type},#{category},#{clientId},#{vin});
+    </insert>
+
+    <!-- Object getVidByVin(String vin); -->
+    <select id="getVidByVin" resultType="Object">
+        select vehicle_id from vehicle where vin = #{vin};
+    </select>
+
+    <!--    Vehicle getVehicleByVehicleId(@Param("vehicleId") Integer vehicleId);-->
+    <select id="getVehicleByVehicleId" resultType="Vehicle">
+            select * from vehicle where vehicle_id=#{vehicleId}
+    </select>
+</mapper>

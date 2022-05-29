@@ -20,7 +20,7 @@
       <el-table-column prop="statu" label="接单状态"  />
       <el-table-column  fixed="right" label="维修委托书">
         <template #default="scope">
-          <el-button type="success" :disabled="scope.row.statu==='等待派单'?true:false" @click="handleEdit(scope.row)">生成</el-button>
+          <el-button type="success" :disabled="scope.row.statu==='未接单'?true:false" @click="handleEdit(scope.row)">生成</el-button>
         </template>
       </el-table-column>
     </el-table>

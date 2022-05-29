@@ -1,9 +1,9 @@
 <template>
   <div style="padding: 10px">
     <el-descriptions  column="3" size="large" border>
-      <el-descriptions-item label="订单号" label-class-name="my-label" class-name="my-content">kooriookami</el-descriptions-item>
-      <el-descriptions-item label="车牌号" label-class-name="my-label" class-name="my-content">18100000000</el-descriptions-item>
-      <el-descriptions-item label="车架号" label-class-name="my-label" class-name="my-content">Suzhou</el-descriptions-item>
+      <el-descriptions-item label="订单号" label-class-name="my-label" class-name="my-content">{{this.titleData.repairId}}</el-descriptions-item>
+      <el-descriptions-item label="车牌号" label-class-name="my-label" class-name="my-content">{{this.titleData.license}}</el-descriptions-item>
+      <el-descriptions-item label="车架号" label-class-name="my-label" class-name="my-content">{{this.titleData.vin}}</el-descriptions-item>
     </el-descriptions>
     <el-table
         :data="tableData"
@@ -11,28 +11,34 @@
         stripe
         style="width: 100%"
         size="large">
-      <el-table-column prop="client_id" label="维修项目编号" width="180" sortable />
-      <el-table-column prop="name" label="项目名称" width="180" />
-      <el-table-column prop="nature" label="额定工时"  />
-      <el-table-column prop="discount" label="零件号"  >
+      <el-table-column prop="proId" label="维修项目编号" width="180" sortable />
+      <el-table-column prop="pname" label="项目名称" width="180" />
+      <el-table-column prop="hour" label="额定工时"  />
+      <el-table-column prop="matIds" label="零件号"  >
         <template #default="scope" style="display: flex;">
-          <div v-for="item in scope.row.discount" :key="item" style="margin-left:0px;border-bottom-style:solid;border-bottom-color: #ebeef5;text-align: center">
+          <div v-for="item in scope.row.matIds" :key="item" style="margin-left:0px;border-bottom-style:solid;border-bottom-color: #ebeef5;text-align: center">
             <span>{{item}}</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="contact" label="零件名"  >
+      <el-table-column prop="names" label="零件名"  >
         <template #default="scope" style="display: flex;">
-            <div v-for="item in scope.row.contact" :key="item" style="margin-left:0px;border-bottom-style:solid;border-bottom-color: #ebeef5;text-align: center">
+            <div v-for="item in scope.row.names" :key="item" style="margin-left:0px;border-bottom-style:solid;border-bottom-color: #ebeef5;text-align: center">
               <span>{{item}}</span>
             </div>
         </template>
       </el-table-column>
-      <el-table-column prop="phone" label="零件数量"  />
+      <el-table-column prop="numbers" label="零件数量"  >
+      <template #default="scope" style="display: flex;">
+        <div v-for="item in scope.row.numbers" :key="item" style="margin-left:0px;border-bottom-style:solid;border-bottom-color: #ebeef5;text-align: center">
+          <span>{{item}}</span>
+        </div>
+      </template>
+      </el-table-column>
       <el-table-column fixed="right" label="操作" width="150">
         <template #default="scope" style="display: flex;">
           <el-button type="success" plain @click="handleEdit(scope.row)" style="font-size: medium;">添加零件</el-button>
-          <el-button  plain @click="handleEdit(scope.row)" style="font-size: medium;margin-top: 10px;margin-left: 0px;background-color: #f5e2b5">完成维修</el-button>
+          <el-button  plain @click="handleFinish(scope.row)" style="font-size: medium;margin-top: 10px;margin-left: 0px;background-color: #f5e2b5">完成维修</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -40,7 +46,7 @@
       <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="crrentPage"
+          :current-page="currentPage"
           :page-sizes="[5, 10, 20]"
           :page-size="pageSize"
           :pager-count="10"
@@ -51,38 +57,33 @@
 
       <el-dialog
           v-model="dialogVisible"
-          title="基本信息"
+          title="添加零件"
           width="30%"
       >
         <el-form ref="formData" :model="form" label-width="120px">
-          <el-form-item label="客户编号" prop="clientID">
-            <el-input v-model="form.client_id" placeholder="请输入客户编号" style="width: 70%"/>
-          </el-form-item>
-          <el-form-item label="客户名称" prop="name">
-            <el-input v-model="form.name" placeholder="请输入客户名称" style="width: 70%"/>
-          </el-form-item>
-          <el-form-item label="客户性质" prop="nature">
-            <el-select v-model="form.nature" placeholder="请输入客户性质" style="width: 70%">
-              <el-option label="个人" value="个人" />
-              <el-option label="单位" value="单位" />
+<!--          <el-form-item label="零件编号" prop="clientID">-->
+<!--            <el-input v-model="form.matId" placeholder="请输入客户编号" style="width: 70%"/>-->
+<!--          </el-form-item>-->
+          <el-form-item label="零件名称" prop="nature" style="width: 70%">
+            <el-select v-model="form.name" class="m-2" placeholder="选择零件名称" style="width: 70%">
+              <el-option
+                  v-for="item in options"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+              />
             </el-select>
           </el-form-item>
-          <el-form-item label="折扣率" prop="discount">
-            <el-input v-model="form.discount" placeholder="请输入折扣率" style="width: 70%"/>
-          </el-form-item>
-          <el-form-item label="联系人" prop="contact">
-            <el-input v-model="form.contact" placeholder="请输入联系人" style="width: 70%"/>
-          </el-form-item>
-          <el-form-item label="联系电话" prop="phone">
-            <el-input v-model="form.phone" placeholder="请输入联系电话" style="width: 70%"/>
+          <el-form-item label="零件个数" prop="discount">
+            <el-input type="number" v-model="form.number" placeholder="请输入零件个数" style="width: 70%"/>
           </el-form-item>
         </el-form>
-        <template #footer>
+          <template #footer>
           <span class="dialog-footer">
-            <el-button @click="dialogVisible = false">取消</el-button>
             <el-button type="primary" @click="save">确定</el-button>
-      </span>
-        </template>
+            <el-button @click="dialogVisible = false">取消</el-button>
+          </span>
+          </template>
       </el-dialog>
     </div>
   </div>
@@ -92,7 +93,7 @@
 // @ is an alias to /src
 
 import request from "@/util/request";
-
+import {useStore} from "vuex";
 export default {
   name: 'Repairman',
   components: {
@@ -100,51 +101,45 @@ export default {
   },
   data() {
     return {
+      matId:null,
+      repairmanId:null,
       currentPage: 1,
       form: {},
       dialogVisible: false,
       search: '',
       pageSize:10,
       total: 10,
-      tableData: [
-        {
-          client_id:'1',
-          name:'皮皮',
-          nature:'个人',
-          discount:[1,2,3],
-          contact:['前制动盘','制动液','轮胎'],
-          phone:'19382761717',
-        },
-        {
-          client_id:'2',
-          name:'皮皮1',
-          nature:'个人1',
-          discount:0.8,
-          contact:['1','2','3'],
-          phone:'19382761',
-        },
-        {
-          client_id:'3',
-          name:'皮',
-          nature:'个',
-          discount:0.7,
-          contact:['1','2','3'],
-          phone:'1938717',
-        },
-      ],
+      options:[],
+      tableData: [],
+      titleData:{},
     }
   },
   setup(){
+    const store = useStore()
+    return{
+      store,
+    }
+  },
+  computed:{
+    getuserform(){
+      return this.store.state.form.userId
+    }
   },
   created(){
+    this.repairmanId=this.getuserform
+    this.form.repairmanId=this.getuserform
     this.load()
   },
   methods:{
     load(){
-      request.get(`/user/showallclients/${this.currentPage}/${this.pageSize}/${this.search}`).then(res => {
+      this.tableData=[]
+      this.titleData={}
+      request.get(`/user/repairman/ongoing/${this.repairmanId}/${this.currentPage}/${this.pageSize}`).then(res => {
         console.log(res)
-        this.tableData = res.data.records//数组类的数据
-        this.total = res.data.total//总条数
+        this.titleData=res[0].data
+        this.form.repairId=this.titleData.repairId
+        this.tableData = res[1].data.list//数组类的数据
+        this.total=res[1].data.total
       })
     },
     add(){
@@ -152,45 +147,54 @@ export default {
       this.form = {}
     },
     save() {
-      if (this.form.id) {
-        request.put("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "更新成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
-      } else {  //新增
-        request.post("/api/user", this.form).then(res => {
-          console.log(res)
-          if (res.code === '0') {
-            this.$message({
-              type: "success",
-              message: "新增成功"
-            })
-          } else {
-            this.$message({
-              type: "error",
-              message: res.msg
-            })
-          }
-        })
-      }
+      this.form.number=parseInt(this.form.number)
+      console.log(this.form)
+      request.post("/user/repairman/ongoing/addMaterial", this.form).then(res => {
+        console.log(res)
+        if (res.code === 454) {
+          this.$message({
+            type: "success",
+            message: "编辑成功"
+          })
+        } else {
+          this.$message({
+            type: "error",
+            message: res.msg
+          })
+        }
+      })
       this.load()
       this.dialogVisible = false
     },
     handleEdit(row){
-      this.form = JSON.parse(JSON.stringify(row))
-      //console.log("Edit Click!")
-      // this.$refs['formData'].resetFields();
+      this.form.maintain=row
+      request.get("/user/repairman/ongoing/getMaterial").then(res => {
+        console.log(res)
+        this.options=res.data
+      })
       this.dialogVisible = true
+    },
+    handleFinish(row){
+      row.repairmanId=this.repairmanId
+      row.repairId=this.form.repairId
+      console.log(row)
+      request.post("/user/repairman/ongoing/finishMaintain", row).then(res => {
+        console.log(res)
+        if (res.code === 457) {
+          this.$message({
+            type: "success",
+            message: res.msg
+          })
+        } else {
+          this.$message({
+            type: "error",
+            message: res.msg
+          })
+        }
+      })
+      // sleep(1000)
+      this.load()
+      console.log("完成后的数据",this.tableData)
     },
     handleSizeChange(pageSize){ //改变当前每页个数触发
       this.pageSize = pageSize

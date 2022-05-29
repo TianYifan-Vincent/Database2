@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shu.carsystem.mapper.MaintainMapper">
+
+    <!-- int insertMaintain(Maintain maintain); -->
+    <insert id="insertMaintain">
+        insert into maintain values (#{repairId},#{repairmanId},#{proId},#{isFinished},#{userId})
+    </insert>
+
+    <resultMap id="NotEnsuredRepairsMap" type="com.shu.carsystem.pojo.NotEnsuredRepair">
+        <result property="repairId" column="repair_id"></result>
+        <result property="license" column="license"></result>
+        <result property="vin" column="vin"></result>
+        <result property="proId" column="pro_id"></result>
+        <result property="pname" column="pname"></result>
+        <result property="failure" column="failure"></result>
+    </resultMap>
+
+    <!-- List<NotEnsuredRepair> getNotEnsuredRepairs(Integer userId, String keyWord); -->
+    <select id="getNotEnsuredRepairs" resultMap="NotEnsuredRepairsMap">
+        select maintain.repair_id,vehicle.license,vehicle.vin,maintain.pro_id,project.pname,repair.failure from maintain,project,vehicle,repair
+        <where>
+            maintain.repair_id = repair.repair_id and maintain.pro_id = project.pro_id and repair.vehicle_id = vehicle.vehicle_id
+            and maintain.repairman_id = #{userId} and maintain.isfinished = '待确认'
+            <if test="keyWord != 'null' and keyWord != ''">
+                and (maintain.repair_id like '%${keyWord}%' or vehicle.license like '%${keyWord}%' or vehicle.vin like '%${keyWord}%' or maintain.pro_id like '%${keyWord}%' or project.pname like '%${keyWord}%' or repair.failure like '%${keyWord}%')
+            </if>
+        </where>
+    </select>
+
+    <!-- List<NotEnsuredRepair> getFinishedRepairs(@Param("userId") Integer userId,@Param("keyWord") String keyWord); -->
+    <select id="getFinishedRepairs" resultMap="NotEnsuredRepairsMap">
+        select maintain.repair_id,vehicle.license,vehicle.vin,maintain.pro_id,project.pname,repair.failure from maintain,project,vehicle,repair
+        <where>
+            maintain.repair_id = repair.repair_id and maintain.pro_id = project.pro_id and repair.vehicle_id = vehicle.vehicle_id
+            and maintain.repairman_id = #{userId} and maintain.isfinished = '已完成'
+            <if test="keyWord != 'null' and keyWord != ''">
+                and (maintain.repair_id like '%${keyWord}%' or vehicle.license like '%${keyWord}%' or vehicle.vin like '%${keyWord}%' or maintain.pro_id like '%${keyWord}%' or project.pname like '%${keyWord}%' or repair.failure like '%${keyWord}%')
+            </if>
+        </where>
+    </select>
+
+    <!-- int affirmMaintain(RepairmanRecord repairmanRecord); -->
+    <update id="affirmMaintain">
+        update maintain set isfinished = '进行中' where repair_id = #{repairmanRecord.repairId} and repairman_id = #{repairmanRecord.repairmanId} and pro_id = #{repairmanRecord.proId}
+    </update>
+
+    <!-- RepairmanRecord getRepairInfoByRepairmanId(@Param("userId") Integer userId; -->
+    <resultMap id="RepairmanRecord" type="com.shu.carsystem.pojo.RepairmanRecord">
+        <result property="repairId" column="repair_id"></result>
+        <result property="license" column="license"></result>
+        <result property="vin" column="vin"></result>
+    </resultMap>
+    <select id="getRepairInfoByRepairmanId" resultMap="RepairmanRecord">
+        select distinct maintain.repair_id,vehicle.license,vehicle.vin from repair,vehicle,maintain
+        <where>
+            repair.repair_id = maintain.repair_id and vehicle.vehicle_id = repair.vehicle_id
+            and repairman_id = #{userId} and isfinished = '进行中'
+        </where>
+    </select>
+
+    <!--  List<Project> getOngoingProjectList(@Param("repairId") Integer repairId, @Param("repairmanId") Integer repairmanId); -->
+    <select id="getOngoingProjectList" resultType="com.shu.carsystem.entity.Project">
+        select project.pro_id,project.pname,project.hour from maintain,project
+        <where>
+            maintain.pro_id = project.pro_id and repairman_id = #{repairmanId} and maintain.repair_id = #{repairId}
+        </where>
+        order by pro_id asc
+    </select>
+
+    <!-- List<MaterialDetail> getMaterialDetail(@Param("repairId") Integer repairId,@Param("repairmanId")Integer repairmanId,@Param("proId") Integer proId); -->
+    <select id="getMaterialDetail" resultType="com.shu.carsystem.pojo.MaterialDetail">
+        select material.mat_id,material.name,"number" from detail,material
+        <where>
+            detail.mat_id = material.mat_id and detail.repair_id = #{repairId} and detail.repairman_id = #{repairmanId} and detail.pro_id = #{proId}
+        </where>
+        order by mat_id asc
+    </select>
+
+    <!-- int setMaterialNumAddNumber(@Param("repairId") Integer repairId,@Param("repairmanId") Integer repairmanId,@Param("proId") Integer proId,@Param("number") Integer number, @Param("matId") Integer matId); -->
+    <update id="setMaterialNumAddNumber">
+        update detail set number = number + #{number} where pro_id = #{proId} and mat_id = #{matId} and repairman_id = #{repairmanId} and repair_id = #{repairId}
+    </update>
+
+    <!-- int addNewDetail(@Param("repairId") Integer repairId,@Param("repairmanId") Integer repairmanId,@Param("proId") Integer proId,@Param("number") Integer number, @Param("matId") Integer matId); -->
+    <insert id="addNewDetail">
+        insert into "detail" values (#{proId},#{matId},#{repairId},#{number},#{repairmanId})
+    </insert>
+
+    <!-- int finishMaintain(@Param("repairId") Integer repairId,@Param("repairmanId") Integer repairmanId,@Param("proId") Integer proId); -->
+    <update id="finishMaintain">
+        update maintain set isfinished = '已完成'
+        <where>
+            repair_id = #{repairId} and repairman_id = #{repairmanId} and pro_id = #{proId};
+        </where>
+    </update>
+
+    <!-- List<MaintainInfo1> getMaintainInfo1ByRid(Integer repairId); -->
+    <resultMap id="MaintainInfo1" type="com.shu.carsystem.pojo.MaintainInfo1">
+        <result property="pro_id" column="proId"></result>
+        <result property="pname" column="pname"></result>
+        <result property="hour" column="hour"></result>
+        <result property="name" column="name"></result>
+        <result property="number" column="number"></result>
+        <result property="cost" column="cost"></result>
+    </resultMap>
+    <select id = "getMaintainInfo1ByRid" resultMap="MaintainInfo1">
+        select maintain.pro_id,pname,project.hour,material.name,detail.number,cost from project,material,maintain,detail
+        <where>
+            maintain.pro_id = detail.pro_id and maintain.repair_id = detail.repair_id and maintain.repairman_id = detail.repairman_id
+            and maintain.pro_id = project.pro_id and detail.mat_id = material.mat_id and maintain.repair_id = #{repairId}
+        </where>
+    </select>
+</mapper>

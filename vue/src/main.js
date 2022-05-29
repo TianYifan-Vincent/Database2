@@ -9,8 +9,8 @@ import * as ElIconModules from '@element-plus/icons'
 
 import axios from 'axios'
 
-
 import '@/assets/css/global.css'
+import {getPdf} from "@/util/pdf";
 
 
 const app = createApp(App)
@@ -26,4 +26,4 @@ for (const iconName in ElIconModules) {
     }
 }
 
-createApp(App).use(store).use(router).use(ElementPlus, {locale:zhCn, size:"mini"}).mount('#app')
+createApp(App).use(store).use(router).use(getPdf).use(ElementPlus, {locale:zhCn, size:"mini"}).mount('#app')

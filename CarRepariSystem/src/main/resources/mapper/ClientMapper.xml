@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shu.carsystem.mapper.ClientMapper">
+
+    <resultMap id="ClientMap" type="Client">
+        <id property="clientId" column="client_id"></id>
+        <result property="name" column="name"></result>
+        <result property="nature" column="nature"></result>
+        <result property="discount" column="discount"></result>
+        <result property="contact" column="contact"></result>
+        <result property="phone" column="phone"></result>
+        <result property="clientId2" column="client_id2"></result>
+        <result property="password" column="password"></result>
+    </resultMap>
+
+    <!-- Client inquireClient(Client client); -->
+    <select id="inquireClient" resultMap="ClientMap">
+        select * from "client"
+            <where>
+                client_id2 = #{clientId2} and password = #{password};
+            </where>
+    </select>
+
+
+
+    <!-- Client inquireClientByName(String id); -->
+    <select id="inquireClientByName" resultMap="ClientMap">
+        select * from "client"
+        <where>
+            client_id2 = #{id};
+        </where>
+    </select>
+
+
+    <!-- int insertClient(Client client); -->
+    <!-- 主键值获取方式为当前数据库中主键最大值+1 -->
+    <insert id="insertClient" useGeneratedKeys="true" keyProperty="clientId">
+        <selectKey keyProperty="clientId" resultType="int" order="BEFORE">
+            SELECT (SELECT max(client_id) FROM client)+1 as client_id
+        </selectKey>
+        insert into "client" values (#{clientId},#{name},#{nature},#{discount},#{contact},#{phone},#{clientId2},#{password});
+    </insert>
+
+    <!-- int updatePasswordById(Integer id, String password); -->
+    <update id="updatePasswordById">
+        update "client" set password = #{password} where client_id = #{id};
+    </update>
+
+    <!-- int updateInfoById(Integer id, String name, String nature, String contact, String phone); -->
+    <update id="updateInfoById">
+        update client set name = #{name}, nature = #{nature}, contact = #{contact}, phone = #{phone}
+            where client_id = #{id};
+    </update>
+
+
+    <!--    List<Client> showClient(@Param("keyword")String keyword);-->
+    <select id="showClient" resultType="Client">
+        select * from client
+        <where>
+            <if test="keyword != '' and keyword !='null'">
+                (client_id like '%${keyword}%' or name like '%${keyword}%' or nature like '%${keyword}%' or   discount like '%${keyword}%' or contact like '%${keyword}%' or phone like '%${keyword}%' )
+            </if>
+        </where>
+    </select>
+
+
+    <!--    int updateClient(Client client);-->
+    <update id="updateClient">
+        update client set name=#{name},nature=#{nature},discount=#{discount},contact=#{contact},phone=#{phone}
+        where client_id=#{clientId}
+    </update>
+</mapper>

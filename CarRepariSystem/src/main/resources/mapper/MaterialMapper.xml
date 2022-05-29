@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shu.carsystem.mapper.MaterialMapper" >
+
+    <!--    int insert(Material material);-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="matId">
+        <selectKey keyProperty="matId" resultType="int" order="BEFORE">
+            SELECT nextval('material_mat_id_seq'::regclass) as id
+        </selectKey>
+        insert into material values (#{matId},#{name},#{cost})
+    </insert>
+
+    <!-- List<String> queryMaterialNameList(Integer matId); -->
+    <select id="queryMaterialNameList" resultType="String" >
+        select material.name from material
+        <if test="matId != null">
+            <where>
+                mat_id = #{matId};
+            </where>
+        </if>
+    </select>
+
+    <!-- Integer getMatIdByName(String name); -->
+    <select id="getMatIdByName" resultType="Integer">
+        select mat_Id from material
+        <where>
+            name = #{name};
+        </where>
+    </select>
+</mapper>

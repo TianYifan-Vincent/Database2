@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shu.carsystem.mapper.RepairMapper">
+    <!-- List<Vehicle> getListByUId(Integer id); -->
+    <resultMap id="RepairMap" type="Repair">
+        <id property="repairId" column="repair_id"></id>
+        <result property="type" column="type"></result>
+        <result property="classification" column="classification"></result>
+        <result property="payment" column="payment"></result>
+        <result property="mile" column="mile"></result>
+        <result property="fuel" column="fuel"></result>
+        <result property="approachTime" column="approach_time"></result>
+        <result property="failure" column="failure"></result>
+        <result property="ddl" column="ddl"></result>
+        <result property="cost" column="cost"></result>
+        <result property="userId" column="user_id"></result>
+        <result property="vehicleId" column="vehicle_id"></result>
+        <result property="hour" column="hour"></result>
+        <result property="statu" column="statu"></result>
+    </resultMap>
+
+
+    <resultMap id="RepairVehicleMap" type="com.shu.carsystem.pojo.RepairVehicle">
+        <id property="repairId" column="repair_id"></id>
+        <result property="license" column="license"></result>
+        <result property="vin" column="vin"></result>
+        <result property="category" column="class"></result>
+        <result property="failure" column="failure"></result>
+        <result property="statu" column="statu"></result>
+    </resultMap>
+
+    <resultMap id="RepairVehicleMap1" type="com.shu.carsystem.pojo.RepairVehicle">
+        <id property="repairId" column="repair_id"></id>
+        <result property="license" column="license"></result>
+        <result property="vin" column="vin"></result>
+        <result property="category" column="class"></result>
+        <result property="failure" column="failure"></result>
+        <result property="statu" column="statu"></result>
+        <result property="type" column="type"></result>
+        <result property="classification" column="classification"></result>
+        <result property="payment" column="payment"></result>
+        <result property="mile" column="mile"></result>
+        <result property="fuel" column="fuel"></result>
+        <result property="approachTime" column="approach_time"></result>
+        <result property="ddl" column="ddl"></result>
+        <result property="cost" column="cost"></result>
+        <result property="userId" column="user_id"></result>
+        <result property="vehicleId" column="vehicle_id"></result>
+    </resultMap>
+
+    <!-- List<Repair> getListByUId(Integer id); -->
+    <select id="getListByUID" resultMap="RepairMap">
+        select * from "repair"
+        <where>
+            user_id = #{id};
+        </where>
+    </select>
+
+    <!-- Repair getRepairByVehicleId(Integer vehicleId); -->
+    <select id="getRepairByVehicleId" resultType="Repair">
+        select * from repair where vehicle_id = #{vehicleId};
+    </select>
+
+    <!-- int insertClientRepair(Repair repair); -->
+    <insert id="insertClientRepair" useGeneratedKeys="true" keyProperty="repairId">
+        <selectKey keyProperty="repairId" resultType="Integer" order="BEFORE">
+            select (select max(repair_id) from repair)+1 as repair_id;
+        </selectKey>
+        insert into "repair" values (#{repairId},#{type},#{classification},#{payment},#{mile},#{fuel},#{approachTime},#{failure},#{ddl},#{cost},#{userId},#{vehicleId},#{hour})
+    </insert>
+
+    <!-- List<ClientRecord> queryClientHistoryRecord(@Param("clientId") int clientId, @Param("keyWord") String keyWord); -->
+    <resultMap id="clientRecord" type="com.shu.carsystem.pojo.ClientRecord">
+        <result property="repairId" column="repair_id"></result>
+        <result property="vin" column="vin"></result>
+        <result property="license" column="license"></result>
+        <result property="category" column="class"></result>
+        <result property="approachTime" column="approach_time"></result>
+        <result property="failure" column="failure"></result>
+        <result property="ddl" column="ddl"></result>
+        <result property="statu" column="statu"></result>
+    </resultMap>
+    <select id="queryClientHistoryRecord" resultMap="clientRecord">
+        select * from repair, vehicle, client
+        <where>
+            repair.vehicle_id = vehicle.vehicle_id and vehicle.client_id = client.client_id and statu != '已完成' and client.client_id = #{clientId}
+            <if test = "keyWord != '' and keyWord != 'null'">
+                and (repair_id like '%${keyWord}%' or vehicle.vin like '%${keyWord}%' or vehicle.license like '%${keyWord}%' or vehicle.class like '%${keyWord}%' or repair.failure like '%${keyWord}%' or repair.ddl like '%${keyWord}%' or repair.statu like '%${keyWord}%' or approach_time like '%${keyWord}%')
+            </if>
+        </where>
+    </select>
+
+    <!-- List<ClientRecord> queryClientFinishedRecord(@Param("clientId") int clientId, @Param("keyWord") String keyWord); -->
+    <select id="queryClientFinishedRecord" resultMap="clientRecord">
+        select * from repair, vehicle, client
+        <where>
+            repair.vehicle_id = vehicle.vehicle_id and vehicle.client_id = client.client_id and statu = '已完成' and client.client_id = #{clientId}
+            <if test = "keyWord != '' and keyWord != 'null'">
+                and (repair_id like '%${keyWord}%' or vehicle.vin like '%${keyWord}%' or vehicle.license like '%${keyWord}%' or vehicle.class like '%${keyWord}%' or repair.failure like '%${keyWord}%' or repair.ddl like '%${keyWord}%' or repair.statu like '%${keyWord}%' or approach_time like '%${keyWord}%' or ddl like '%${keyWord}%')
+            </if>
+        </where>
+    </select>
+
+    <!--List<Repair> showRepairToReceive(@Param("keyword") String keyword);-->
+    <select id="showRepairToReceive" resultMap="RepairVehicleMap">
+            select repair.repair_id ,vehicle.license,vehicle.vin,vehicle.class,repair.failure
+            from repair ,vehicle
+            <where>
+                repair.statu = '未接单'and repair.vehicle_id=vehicle.vehicle_id
+                <if test="keyword != '' and keyword !='null'">
+                    and (repair_id like '%${keyword}%' or license like '%${keyword}%' or vin like '%${keyword}%' or   class like '%${keyword}%' or failure like '%${keyword}%' )
+                </if>
+            </where>
+    </select>
+
+    <!--    List<Repair> showRepairInProgress(@Param("keyword") String keyword);-->
+    <select id="showRepairInProgress" resultMap="RepairVehicleMap">
+        select repair.repair_id ,vehicle.license,vehicle.vin,vehicle.class,repair.failure
+        from repair ,vehicle
+        <where>
+            repair.statu = '等待派单'and repair.vehicle_id=vehicle.vehicle_id
+            <if test="keyword != '' and keyword !='null'">
+                and (repair_id like '%${keyword}%' or license like '%${keyword}%' or vin like '%${keyword}%' or   class like '%${keyword}%' or failure like '%${keyword}%' )
+            </if>
+        </where>
+    </select>
+
+    <!--     List<Repair> showRepairComplete(@Param("keyword") String keyword);-->
+    <select id="showRepairComplete" resultMap="RepairVehicleMap">
+        select repair.repair_id ,vehicle.license,vehicle.vin,vehicle.class,repair.failure
+        from repair ,vehicle
+        <where>
+            repair.statu = '已完成'and repair.vehicle_id=vehicle.vehicle_id
+            <if test="keyword != '' and keyword !='null'">
+                and (repair_id like '%${keyword}%' or license like '%${keyword}%' or vin like '%${keyword}%' or   class like '%${keyword}%' or failure like '%${keyword}%' )
+            </if>
+        </where>
+    </select>
+
+
+    <!--     int updateRepair(Repair repair);;-->
+    <update id="updateRepair" parameterType="Repair">
+        update repair set   type = #{type},
+                            classification=#{classification},
+                            payment=#{payment},
+                            mile=#{mile},
+                            fuel=#{fuel},
+                            approach_time=#{approachTime} ,
+                            failure=#{failure} ,
+                            ddl=#{ddl} ,
+                            cost=#{cost} ,
+                            user_id=#{userId} ,
+                            vehicle_id=#{vehicleId} ,
+                            hour=#{hour}  ,
+                            statu=#{statu}
+        where repair_id=#{repairId};
+    </update>
+
+    <!--    List<RepairVehicle> showAllRepair(@Param("keyword") String keyword);-->
+    <select id="showAllRepair" resultMap="RepairVehicleMap1">
+        select *
+        from repair ,vehicle
+        <where>
+            repair.vehicle_id=vehicle.vehicle_id
+            <if test="keyword != '' and keyword !='null'">
+                and (repair_id like '%${keyword}%' or license like '%${keyword}%' or vin like '%${keyword}%' or  class like '%${keyword}%' or failure like '%${keyword}%' or statu  like '%${keyword}%')
+            </if>
+        </where>
+    </select>
+
+    <!-- List<Integer> getDispatchedList(); -->
+    <select id="getDispatchedList" resultType="Integer">
+        select repair_id from repair
+        <where>
+            statu = '等待派单'
+        </where>
+        ORDER BY repair_id ASC;
+    </select>
+
+    <!-- RepairInfo getRepairInfoByVin(String vin, String failure); -->
+    <resultMap id="RepairInfo" type="com.shu.carsystem.pojo.RepairInfo">
+        <result column="repair_id" property="repairId"></result>
+        <result column="license" property="license"></result>
+        <result column="client_id" property="clientId"></result>
+        <result column="" property="repairType"></result>
+        <result column="classification" property="repairClassification"></result>
+        <result column="payment" property="payment"></result>
+        <result column="vin" property="vin"></result>
+        <result column="mile" property="mile"></result>
+        <result column="fuel" property="fuel"></result>
+        <result column="approach_time" property="approachTime"></result>
+        <result column="realname" property="realname"></result>
+        <result column="user_id" property="userId"></result>
+        <result column="ddl" property="ddl"></result>
+        <result column="failure" property="failure"></result>
+        <result column="discount" property="discount"></result>
+        <result column="hour" property="hour"></result>
+        <result column="cost" property="cost"></result>
+    </resultMap>
+    <select id="getRepairInfoByVin" resultMap="RepairInfo">
+        select repair.repair_id,license,client.client_id,repair.type,repair.classification,payment,vin,mile,fuel,approach_time,realname,"user".user_id,repair.ddl,failure,discount,repair.hour,repair.cost
+               from repair,client,vehicle,"user"
+        <where>
+            repair.vehicle_id = vehicle.vehicle_id and "user".user_id = repair.user_id and vehicle.client_id = client.client_id
+            and vin = #{vin} and failure = #{failure};
+        </where>
+    </select>
+</mapper>

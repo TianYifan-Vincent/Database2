@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shu.carsystem.mapper.UserMapper" >
+
+    <resultMap id="UserMap" type="User">
+        <result property="userId" column="user_id"></result>
+        <result property="name" column="name"></result>
+        <result property="password" column="password"></result>
+        <result property="phone" column="phone"></result>
+        <result property="isAdmin" column="is_admin"></result>
+        <result property="isRepairman" column="is_repairman"></result>
+        <result property="job" column="job"></result>
+        <result property="realname" column="realname"></result>
+<!--        <result property="status" column="status"></result>-->
+    </resultMap>
+    <resultMap id="ProjectRepairmanMap" type="com.shu.carsystem.pojo.ProjectRepairman">
+        <result property="proId" column="pro_id"></result>
+        <result property="pname" column="pname"></result>
+        <result property="hour" column="hour"></result>
+        <result property="userId" column="user_id"></result>
+        <result property="name" column="name"></result>
+        <result property="phone" column="phone"></result>
+        <result property="job" column="job"></result>
+        <result property="realname" column="realname"></result>
+<!--        <result property="status" column="status"></result>-->
+    </resultMap>
+    <!-- User inquireUser(User user); -->
+   <select id="inquireUser" resultMap="UserMap">
+        select * from "user"
+        <where>
+            name = #{name} and password = #{password};
+        </where>
+   </select>
+
+    <!-- User inquireUserByName(String id); -->
+    <select id="inquireUserByName" resultMap="UserMap">
+        select * from "user"
+        <where>
+            name = #{id};
+        </where>
+    </select>
+
+
+    <!--    User inqurieUserByUserId(@Param("UserId") Integer userId);-->
+    <select id="inqurieUserByUserId" resultType="User">
+        select * from "user" where user_id = #{UserId}
+    </select>
+
+    <!--    List<ProjectRepairman> showRepairman();-->
+    <select id="showRepairman" resultMap="ProjectRepairmanMap">
+        select project.pro_id,project.pname,project.hour,"user".user_id,"user".name,"user".phone,"user".job,"user".realname
+        from project,"user"
+        <where>
+            "user".is_repairman=1 and project.pjob="user".job and "user".statu = '空闲中'
+            <if test="keyword != '' and keyword !='null'">
+                and (pro_id like '%${keyword}%' or pname like '%${keyword}%' or hour like '%${keyword}%' or user_id like '%${keyword}%' or phone like '%${keyword}%' or job like '%${keyword}%' or realname like '%${keyword}%' or statu like '%${keyword}%')
+            </if>
+        </where>
+    </select>
+</mapper>

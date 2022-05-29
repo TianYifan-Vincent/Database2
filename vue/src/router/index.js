@@ -78,6 +78,11 @@ const routes = [
         name: 'Onrepair',
         component:() => import("@/views/Onrepair")
       },
+      {
+        path: '/repairfinished',
+        name: 'Repairfinished',
+        component:() => import("@/views/Repairfinished")
+      },
     ]
   },
 ]

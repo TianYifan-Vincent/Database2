@@ -1,0 +1,25 @@
+server:
+  port: 9090
+
+#?????
+spring:
+  datasource:
+    url: jdbc:postgresql://124.70.139.117:26000/car?currentSchema=public
+    username: liuliu
+    password: Lm_310013
+    driver-class-name: org.postgresql.Driver
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+
+
+
+# mybatis??
+mybatis:
+  config-location: classpath:mybatis-config.xml   #??????
+  mapper-locations: classpath:mapper/*.xml        #sql????
+  type-aliases-package: com.shu.carsystem.entity  #entity??????
+
